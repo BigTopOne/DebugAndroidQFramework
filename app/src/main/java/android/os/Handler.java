@@ -753,7 +753,7 @@ public class Handler {
         if (mAsynchronous) {
             msg.setAsynchronous(true);
         }
-        // 消息队列执行入队操作
+        // 消息队列执行入队操作,由MessageQueue 调用
         return queue.enqueueMessage(msg, uptimeMillis);
     }
 

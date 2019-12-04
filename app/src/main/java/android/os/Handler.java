@@ -574,6 +574,7 @@ public class Handler {
         }
 
         if (Looper.myLooper() == mLooper) {
+            // 直接run.
             r.run();
             return true;
         }
@@ -747,6 +748,7 @@ public class Handler {
 
     private boolean enqueueMessage(@NonNull MessageQueue queue, @NonNull Message msg,
             long uptimeMillis) {
+        // 给handler 赋值；
         msg.target = this;
         msg.workSourceUid = ThreadLocalWorkSource.getUid();
 
@@ -754,6 +756,7 @@ public class Handler {
             msg.setAsynchronous(true);
         }
         // 消息队列执行入队操作,由MessageQueue 调用
+        // msg 里面有handler
         return queue.enqueueMessage(msg, uptimeMillis);
     }
 

@@ -104,13 +104,14 @@ public final class Message implements Parcelable {
      *
      * It is an error to attempt to enqueue or recycle a message that is already in use.
      */
-    /*package*/ static final int FLAG_IN_USE = 1 << 0;
+    /*package*/
+    private static final int FLAG_IN_USE = 1;
 
     /** If set message is asynchronous */
-    /*package*/ static final int FLAG_ASYNCHRONOUS = 1 << 1;
+    /*package*/ private static final int FLAG_ASYNCHRONOUS = 1 << 1;
 
     /** Flags to clear in the copyFrom method */
-    /*package*/ static final int FLAGS_TO_CLEAR_ON_COPY_FROM = FLAG_IN_USE;
+    /*package*/ private static final int FLAGS_TO_CLEAR_ON_COPY_FROM = FLAG_IN_USE;
 
     @UnsupportedAppUsage
     /*package*/ int flags;
@@ -132,6 +133,7 @@ public final class Message implements Parcelable {
     @UnsupportedAppUsage
     /*package*/ Runnable callback;
 
+    // 个人理解，成一个队列中的下一个。
     // sometimes we store linked lists of these things
     @UnsupportedAppUsage
     /*package*/ Message next;

@@ -491,7 +491,8 @@ public final class MessageQueue {
                     p = p.next;
                 }
             }
-            if (prev != null) { // invariant: p == prev.next
+            // invariant: p == prev.next
+            if (prev != null) {
                 msg.next = p;
                 prev.next = msg;
             } else {
@@ -509,6 +510,7 @@ public final class MessageQueue {
      * {@link #postSyncBarrier}.
      *
      * @throws IllegalStateException if the barrier was not found.
+     * barry
      *
      * @hide
      */
@@ -545,10 +547,18 @@ public final class MessageQueue {
         }
     }
 
+    /**
+     * 入队操作。 Handler 中 enqueueMessage()调用
+     * @param msg
+     * @param when
+     * @return
+     */
     boolean enqueueMessage(Message msg, long when) {
         if (msg.target == null) {
+            // target就是handler
             throw new IllegalArgumentException("Message must have a target.");
         }
+
         if (msg.isInUse()) {
             throw new IllegalStateException(msg + " This message is already in use.");
         }
@@ -557,11 +567,14 @@ public final class MessageQueue {
             if (mQuitting) {
                 IllegalStateException e = new IllegalStateException(
                         msg.target + " sending message to a Handler on a dead thread");
+
                 Log.w(TAG, e.getMessage(), e);
+                // 退出以后，消息回收
                 msg.recycle();
                 return false;
             }
 
+            // 标识消息在使用
             msg.markInUse();
             msg.when = when;
             Message p = mMessages;
@@ -583,15 +596,18 @@ public final class MessageQueue {
                     if (p == null || when < p.when) {
                         break;
                     }
+
                     if (needWake && p.isAsynchronous()) {
                         needWake = false;
                     }
                 }
-                msg.next = p; // invariant: p == prev.next
+
+                // invariant: p == prev.next
+                msg.next = p;
                 prev.next = msg;
             }
 
-            // We can assume mPtr != 0 because mQuitting is false.
+            // We can assume（假设）  mPtr != 0 because mQuitting is false.
             if (needWake) {
                 nativeWake(mPtr);
             }
@@ -852,7 +868,7 @@ public final class MessageQueue {
          * specified when the listener was added.
          * </p>
          */
-        public static final int EVENT_INPUT = 1 << 0;
+        public static final int EVENT_INPUT = 1;
 
         /**
          * File descriptor event: Indicates that the file descriptor is ready for output

@@ -25,6 +25,8 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_START;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
+import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
+import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -80,23 +82,21 @@ import android.graphics.Canvas;
 import android.graphics.HardwareRenderer;
 import android.graphics.ImageDecoder;
 import android.hardware.display.DisplayManagerGlobal;
+import android.media.CloseGuard;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.Proxy;
 import android.net.Uri;
+
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Debug;
 import android.os.Environment;
-import android.os.FileUtils;
 import android.os.GraphicsEnvironment;
-import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
-import android.os.ICancellationSignal;
 import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Message;
@@ -104,14 +104,12 @@ import android.os.MessageQueue;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
-import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.BlockedNumberContract;
 import android.provider.CalendarContract;
@@ -124,6 +122,7 @@ import android.renderscript.RenderScriptCacheDir;
 import android.security.NetworkSecurityPolicy;
 import android.security.net.config.NetworkSecurityConfigProvider;
 import android.system.ErrnoException;
+import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
 import android.util.AndroidRuntimeException;
@@ -165,18 +164,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.org.conscrypt.OpenSSLSocketImpl;
-import com.android.org.conscrypt.TrustedCertificateStore;
-import com.android.server.am.MemInfoDumpProto;
 
-import dalvik.system.CloseGuard;
-import dalvik.system.VMDebug;
-import dalvik.system.VMRuntime;
-
-import libcore.io.ForwardingOs;
-import libcore.io.IoUtils;
-import libcore.io.Os;
-import libcore.net.event.NetworkEventDispatcher;
 
 import org.apache.harmony.dalvik.ddmc.DdmVmInternal;
 
@@ -7074,13 +7062,19 @@ public final class ActivityThread extends ClientTransactionHandler {
         if (!system) {
             android.ddm.DdmHandleAppName.setAppName("<pre-initialized>",
                                                     UserHandle.myUserId());
+
             RuntimeInit.setApplicationObject(mAppThread.asBinder());
+
+            // 获取AMS。
             final IActivityManager mgr = ActivityManager.getService();
+
             try {
+                // 依附Application
                 mgr.attachApplication(mAppThread, startSeq);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
+
             // Watch for getting close to heap limit.
             BinderInternal.addGcWatcher(new Runnable() {
                 @Override public void run() {
@@ -7307,6 +7301,10 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    /**
+     * main 函数
+     * @param args
+     */
     public static void main(String[] args) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "ActivityThreadMain");
 
@@ -7340,6 +7338,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
         ActivityThread thread = new ActivityThread();
+        // invoke attach
         thread.attach(false, startSeq);
 
         if (sMainThreadHandler == null) {
@@ -7352,7 +7351,9 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         // End of event ActivityThreadMain.
-        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        Trace.trd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
+        // 开始循环消息队列
         Looper.loop();
 
         throw new RuntimeException("Main thread loop unexpectedly exited");

@@ -71,7 +71,8 @@ public final class Looper {
     @UnsupportedAppUsage
     static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<Looper>();
     @UnsupportedAppUsage
-    private static Looper sMainLooper;  // guarded by Looper.class
+    // guarded by Looper.class
+    private static Looper sMainLooper;
     private static Observer sObserver;
 
     @UnsupportedAppUsage
@@ -171,7 +172,8 @@ public final class Looper {
         boolean slowDeliveryDetected = false;
 
         for (;;) {
-            Message msg = queue.next(); // might block
+            // might block
+            Message msg = queue.next();
             if (msg == null) {
                 // No message indicates that the message queue is quitting.
                 return;
@@ -183,6 +185,7 @@ public final class Looper {
                 logging.println(">>>>> Dispatching to " + msg.target + " " +
                         msg.callback + ": " + msg.what);
             }
+
             // Make sure the observer won't change while processing a transaction.
             final Observer observer = sObserver;
 
@@ -193,6 +196,7 @@ public final class Looper {
                 slowDispatchThresholdMs = thresholdOverride;
                 slowDeliveryThresholdMs = thresholdOverride;
             }
+
             final boolean logSlowDelivery = (slowDeliveryThresholdMs > 0) && (msg.when > 0);
             final boolean logSlowDispatch = (slowDispatchThresholdMs > 0);
 
@@ -211,7 +215,9 @@ public final class Looper {
             }
             long origWorkSource = ThreadLocalWorkSource.setUid(msg.workSourceUid);
             try {
+                // 分发消息
                 msg.target.dispatchMessage(msg);
+
                 if (observer != null) {
                     observer.messageDispatched(token, msg);
                 }

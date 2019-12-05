@@ -282,6 +282,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.EventLog;
+import android.util.EventLogTags;
 import android.util.Log;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
@@ -3495,6 +3496,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mActivityTaskManager.startActivity(caller, callingPackage, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags, profilerInfo, bOptions);
     }
+
 
     @Override
     public final int startActivityAsUser(IApplicationThread caller, String callingPackage,

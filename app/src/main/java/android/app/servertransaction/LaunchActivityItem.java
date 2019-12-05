@@ -42,6 +42,8 @@ import java.util.Objects;
 
 /**
  * Request to launch an activity.
+ * 注意父类是 ClientTransactionItem
+ *
  * @hide
  */
 public class LaunchActivityItem extends ClientTransactionItem {
@@ -72,36 +74,52 @@ public class LaunchActivityItem extends ClientTransactionItem {
         client.updatePendingConfiguration(mCurConfig);
     }
 
+    /**
+     *
+     *
+     * 1:TransactionExecutor #executeCallbacks()
+     * 2:TransactionExecutor #executeLifecycleState()
+     * 被事务执行 如 这个两个类调用：ClientTransactionItem, ActivityLifecycleItem
+     * @param client Target client handler.
+     * @param token Target activity token.
+     * @param pendingActions Container that may have data pending to be used.
+     *
+     */
     @Override
     public void execute(ClientTransactionHandler client, IBinder token,
-            PendingTransactionActions pendingActions) {
+                        PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
         ActivityClientRecord r = new ActivityClientRecord(token, mIntent, mIdent, mInfo,
                 mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor, mState, mPersistentState,
                 mPendingResults, mPendingNewIntents, mIsForward,
                 mProfilerInfo, client, mAssistToken);
-        client.handleLaunchActivity(r, pendingActions, null /* customIntent */);
+        /* customIntent  is null */
+        client.handleLaunchActivity(r, pendingActions, null );
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     @Override
     public void postExecute(ClientTransactionHandler client, IBinder token,
-            PendingTransactionActions pendingActions) {
+                            PendingTransactionActions pendingActions) {
         client.countLaunchingActivities(-1);
     }
 
 
     // ObjectPoolItem implementation
 
-    private LaunchActivityItem() {}
+    private LaunchActivityItem() {
+    }
 
-    /** Obtain an instance initialized with provided params. */
+    /**
+     * Obtain an instance initialized with provided params.
+     */
     public static LaunchActivityItem obtain(Intent intent, int ident, ActivityInfo info,
-            Configuration curConfig, Configuration overrideConfig, CompatibilityInfo compatInfo,
-            String referrer, IVoiceInteractor voiceInteractor, int procState, Bundle state,
-            PersistableBundle persistentState, List<ResultInfo> pendingResults,
-            List<ReferrerIntent> pendingNewIntents, boolean isForward, ProfilerInfo profilerInfo,
-            IBinder assistToken) {
+                                            Configuration curConfig, Configuration overrideConfig, CompatibilityInfo compatInfo,
+                                            String referrer, IVoiceInteractor voiceInteractor, int procState, Bundle state,
+                                            PersistableBundle persistentState, List<ResultInfo> pendingResults,
+                                            List<ReferrerIntent> pendingNewIntents, boolean isForward, ProfilerInfo profilerInfo,
+                                            IBinder assistToken) {
+
         LaunchActivityItem instance = ObjectPool.obtain(LaunchActivityItem.class);
         if (instance == null) {
             instance = new LaunchActivityItem();
@@ -123,7 +141,9 @@ public class LaunchActivityItem extends ClientTransactionItem {
 
     // Parcelable implementation
 
-    /** Write from Parcel. */
+    /**
+     * Write from Parcel.
+     */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedObject(mIntent, flags);
@@ -144,7 +164,9 @@ public class LaunchActivityItem extends ClientTransactionItem {
         dest.writeStrongBinder(mAssistToken);
     }
 
-    /** Read from Parcel. */
+    /**
+     * Read from Parcel.
+     */
     private LaunchActivityItem(Parcel in) {
         setValues(this, in.readTypedObject(Intent.CREATOR), in.readInt(),
                 in.readTypedObject(ActivityInfo.CREATOR), in.readTypedObject(Configuration.CREATOR),
@@ -159,16 +181,17 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 in.readStrongBinder());
     }
 
-    public static final @android.annotation.NonNull Creator<LaunchActivityItem> CREATOR =
+    public static final @android.annotation.NonNull
+    Creator<LaunchActivityItem> CREATOR =
             new Creator<LaunchActivityItem>() {
-        public LaunchActivityItem createFromParcel(Parcel in) {
-            return new LaunchActivityItem(in);
-        }
+                public LaunchActivityItem createFromParcel(Parcel in) {
+                    return new LaunchActivityItem(in);
+                }
 
-        public LaunchActivityItem[] newArray(int size) {
-            return new LaunchActivityItem[size];
-        }
-    };
+                public LaunchActivityItem[] newArray(int size) {
+                    return new LaunchActivityItem[size];
+                }
+            };
 
     @Override
     public boolean equals(Object o) {
@@ -259,11 +282,11 @@ public class LaunchActivityItem extends ClientTransactionItem {
 
     // Using the same method to set and clear values to make sure we don't forget anything
     private static void setValues(LaunchActivityItem instance, Intent intent, int ident,
-            ActivityInfo info, Configuration curConfig, Configuration overrideConfig,
-            CompatibilityInfo compatInfo, String referrer, IVoiceInteractor voiceInteractor,
-            int procState, Bundle state, PersistableBundle persistentState,
-            List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
-            boolean isForward, ProfilerInfo profilerInfo, IBinder assistToken) {
+                                  ActivityInfo info, Configuration curConfig, Configuration overrideConfig,
+                                  CompatibilityInfo compatInfo, String referrer, IVoiceInteractor voiceInteractor,
+                                  int procState, Bundle state, PersistableBundle persistentState,
+                                  List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
+                                  boolean isForward, ProfilerInfo profilerInfo, IBinder assistToken) {
         instance.mIntent = intent;
         instance.mIdent = ident;
         instance.mInfo = info;

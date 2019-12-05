@@ -702,6 +702,15 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         return resolveActivity(intent, rInfo, startFlags, profilerInfo);
     }
 
+    /**
+     * 注意这个LaunchActivityItem
+     * @param r
+     * @param proc
+     * @param andResume
+     * @param checkConfig
+     * @return
+     * @throws RemoteException
+     */
     boolean realStartActivityLocked(ActivityRecord r, WindowProcessController proc,
             boolean andResume, boolean checkConfig) throws RemoteException {
 
@@ -829,16 +838,25 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         proc.getThread(), r.appToken);
 
                 final DisplayContent dc = r.getDisplay().mDisplayContent;
+
+                // 什么鬼 ？ Transaction： 事物
                 clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),
-                        System.identityHashCode(r), r.info,
+                        System.identityHashCode(r),
+                        r.info,
                         // TODO: Have this take the merged configuration instead of separate global
                         // and override configs.
                         mergedConfiguration.getGlobalConfiguration(),
-                        mergedConfiguration.getOverrideConfiguration(), r.compat,
-                        r.launchedFromPackage, task.voiceInteractor, proc.getReportedProcState(),
-                        r.icicle, r.persistentState, results, newIntents,
-                        dc.isNextTransitionForward(), proc.createProfilerInfoIfNeeded(),
-                                r.assistToken));
+                        mergedConfiguration.getOverrideConfiguration(),
+                        r.compat,
+                        r.launchedFromPackage,
+                        task.voiceInteractor,
+                        proc.getReportedProcState(),
+                        r.icicle, r.persistentState,
+                        results,
+                        newIntents,
+                        dc.isNextTransitionForward(),
+                        proc.createProfilerInfoIfNeeded(),
+                        r.assistToken));
 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
@@ -849,7 +867,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 }
                 clientTransaction.setLifecycleStateRequest(lifecycleItem);
 
-                // Schedule transaction.
+                // Schedule transaction. 执行事务,
                 mService.getLifecycleManager().scheduleTransaction(clientTransaction);
 
                 if ((proc.mInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0
@@ -953,6 +971,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
     }
 
+    /**
+     * 注意啊，这个函数很有意思，它是在{@See ActivityStack} 类中，被调用的，有3处呢，
+     * 真的不是本类，不要迷惑。
+     *  核心：realStartActivityLocked（）
+     * @param r
+     * @param andResume
+     * @param checkConfig
+     */
     void startSpecificActivityLocked(ActivityRecord r, boolean andResume, boolean checkConfig) {
         // Is this activity's application already running?
         final WindowProcessController wpc =
@@ -988,8 +1014,15 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             // Post message to start process to avoid possible deadlock of calling into AMS with the
             // ATMS lock held.
             final Message msg = PooledLambda.obtainMessage(
-                    ActivityManagerInternal::startProcess, mService.mAmInternal, r.processName,
-                    r.info.applicationInfo, knownToBeDead, "activity", r.intent.getComponent());
+                    // 卧槽，java 8 语法， 装逼666啊.......
+                    ActivityManagerInternal::startProcess,
+                    mService.mAmInternal, r.processName,
+                    r.info.applicationInfo, knownToBeDead,
+                    "activity",
+                    r.intent.getComponent());
+
+            // 注意这个mH哈，一看就是模仿ActivityThread类中的那个H 类写的。
+            // {@see ActivityTaskManagerService} mService
             mService.mH.sendMessage(msg);
         } finally {
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);

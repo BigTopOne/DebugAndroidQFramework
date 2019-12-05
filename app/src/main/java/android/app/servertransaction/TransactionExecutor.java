@@ -92,14 +92,22 @@ public class TransactionExecutor {
 
         if (DEBUG_RESOLVER) Slog.d(TAG, transactionToString(transaction, mTransactionHandler));
 
+        // 重点
         executeCallbacks(transaction);
 
         executeLifecycleState(transaction);
+
         mPendingActions.clear();
         if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "End resolving transaction");
     }
 
     /** Cycle through all states requested by callbacks and execute them at proper times. */
+
+    /**
+     * 本类：execute（）调用
+     *    TransactionExecutor  核心： item.execute(mTransactionHandler, token, mPendingActions);
+     * @param transaction
+     */
     @VisibleForTesting
     public void executeCallbacks(ClientTransaction transaction) {
         final List<ClientTransactionItem> callbacks = transaction.getCallbacks();
@@ -132,7 +140,9 @@ public class TransactionExecutor {
                 cycleToPath(r, closestPreExecutionState, transaction);
             }
 
+            //  ClientTransactionItem 启动一个Activity
             item.execute(mTransactionHandler, token, mPendingActions);
+
             item.postExecute(mTransactionHandler, token, mPendingActions);
             if (r == null) {
                 // Launch activity request will create an activity record.
@@ -149,6 +159,10 @@ public class TransactionExecutor {
     }
 
     /** Transition to the final state if requested by the transaction. */
+    /**
+     *
+     * @param transaction
+     */
     private void executeLifecycleState(ClientTransaction transaction) {
         final ActivityLifecycleItem lifecycleItem = transaction.getLifecycleStateRequest();
         if (lifecycleItem == null) {
@@ -173,6 +187,7 @@ public class TransactionExecutor {
         cycleToPath(r, lifecycleItem.getTargetState(), true /* excludeLastState */, transaction);
 
         // Execute the final transition with proper parameters.
+        // 事务开始执行
         lifecycleItem.execute(mTransactionHandler, token, mPendingActions);
         lifecycleItem.postExecute(mTransactionHandler, token, mPendingActions);
     }

@@ -1596,6 +1596,7 @@ final class ActivityRecord extends ConfigurationContainer {
     }
 
     /**
+     * 提供一个新的意图到一个已经存在的activity.
      * Deliver a new Intent to an existing activity, so that its onNewIntent()
      * method will be called at the proper time.
      */
@@ -2035,12 +2036,17 @@ final class ActivityRecord extends ConfigurationContainer {
         handleAlreadyVisible();
     }
 
-    /** Send visibility change message to the client and pause if needed. */
+
+
+    /**
+     * Send visibility change message to the client and pause if needed.
+     */
     void makeClientVisible() {
         mClientVisibilityDeferred = false;
         try {
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
-                    WindowVisibilityItem.obtain(true /* showWindow */));
+                    WindowVisibilityItem.obtain(true
+                            /* showWindow */));
             makeActiveIfNeeded(null /* activeActivity*/);
             if (isState(STOPPING, STOPPED) && isFocusable()) {
                 // #shouldMakeActive() only evaluates the topmost activities in task, so
@@ -2055,6 +2061,7 @@ final class ActivityRecord extends ConfigurationContainer {
     }
 
     /**
+     * {@link  ActivityStack #ensureActivitiesVisibleLocked()}
      * Make activity resumed or paused if needed.
      * @param activeActivity an activity that is resumed or just completed pause action.
      *                       We won't change the state of this activity.
@@ -2064,8 +2071,10 @@ final class ActivityRecord extends ConfigurationContainer {
             if (DEBUG_VISIBILITY) {
                 Slog.v("TAG_VISIBILITY", "Resume visible activity, " + this);
             }
+            // 这一步，恢复栈顶的activity
             return getActivityStack().resumeTopActivityUncheckedLocked(activeActivity /* prev */,
                     null /* options */);
+            // 判断是否需要暂停Activity
         } else if (shouldPauseActivity(activeActivity)) {
             if (DEBUG_VISIBILITY) {
                 Slog.v("TAG_VISIBILITY", "Pause visible activity, " + this);

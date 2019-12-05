@@ -55,6 +55,7 @@ import android.view.Window;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.content.ReferrerIntent;
+import com.android.server.am.ActivityManagerService;
 
 import java.io.File;
 import java.lang.annotation.Retention;
@@ -63,7 +64,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Base class for implementing application instrumentation code.  When running
+ * Base class for implementing application instrumentation(仪表) code.  When running
  * with instrumentation turned on, this class will be instantiated for you
  * before any of the application code, allowing you to monitor all of the
  * interaction the system has with the application.  An Instrumentation
@@ -1288,7 +1289,7 @@ public class Instrumentation {
     }
 
     /**
-     * Perform calling of an activity's {@link Activity#onCreate}
+     * Perform（执行） calling of an activity's {@link Activity#onCreate}
      * method.  The default implementation simply calls through to that method.
      *
      * @param activity The activity being created.
@@ -1296,6 +1297,7 @@ public class Instrumentation {
      */
     public void callActivityOnCreate(Activity activity, Bundle icicle) {
         prePerformCreate(activity);
+        // 执行OnCreate()
         activity.performCreate(icicle);
         postPerformCreate(activity);
     }
@@ -1877,6 +1879,7 @@ public class Instrumentation {
      * @see Activity#startActivity(Intent)
      * @see Activity#startActivityForResult(Intent, int)
      * @see Activity#startActivityFromChild
+     * @see ActivityManagerService#startActivityAsUser(IApplicationThread, String, Intent, String, IBinder, String, int, int, ProfilerInfo, Bundle, int)
      *
      * {@hide}
      */
@@ -1889,7 +1892,9 @@ public class Instrumentation {
             synchronized (mSync) {
                 final int N = mActivityMonitors.size();
                 for (int i=0; i<N; i++) {
+                    // ActivityMonitor 是什么东西
                     final ActivityMonitor am = mActivityMonitors.get(i);
+                    // 一个结果
                     ActivityResult result = null;
                     if (am.ignoreMatchingSpecificIntents()) {
                         result = am.onStartActivity(intent);
@@ -1910,12 +1915,18 @@ public class Instrumentation {
         try {
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(who);
+
+            // IActivityTaskManager 实际上是调用ActivityManagerService 的startActivityAsUser()函数
             int result = ActivityTaskManager.getService()
                 .startActivityAsUser(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, resultWho,
                         requestCode, 0, null, options, user.getIdentifier());
+
+
+            // 检测启动结果
             checkStartActivityResult(result, intent);
+
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
         }

@@ -1636,6 +1636,7 @@ class ActivityStack extends ConfigurationContainer {
     }
 
     /**
+     * 暂停当前正在运行的activity
      * Start pausing the currently resumed activity.  It is an error to call this if there
      * is already an activity being paused or there is no resumed activity.
      *
@@ -2112,8 +2113,11 @@ class ActivityStack extends ConfigurationContainer {
     }
 
     /**
+     *
      * Make sure that all activities that need to be visible in the stack (that is, they
      * currently can be seen by the user) actually are and update their configuration.
+     *
+     * 确保所有需要在堆栈中可见的活动（即用户当前可以看到的活动）确实存在，并更新其配置。
      */
     final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
@@ -2202,6 +2206,7 @@ class ActivityStack extends ConfigurationContainer {
                             }
 
                             if (notifyClients) {
+                                // 激活activity
                                 r.makeActiveIfNeeded(starting);
                             }
                         } else {
@@ -2363,6 +2368,17 @@ class ActivityStack extends ConfigurationContainer {
         }
     }
 
+
+    /**
+     * activity 的重启
+     * 注意这个函数startSpecificActivityLocked()
+     * @param starting
+     * @param configChanges
+     * @param isTop
+     * @param andResume
+     * @param r
+     * @return
+     */
     private boolean makeVisibleAndRestartIfNeeded(ActivityRecord starting, int configChanges,
             boolean isTop, boolean andResume, ActivityRecord r) {
         // We need to make sure the app is running if it's the top, or it is just made visible from
@@ -2547,6 +2563,10 @@ class ActivityStack extends ConfigurationContainer {
     }
 
     /**
+     *
+     * 实际调用 {@see ActivityRecord# makeActiveIfNeeded(ActivityRecord )}
+     *
+     *
      * Ensure that the top activity in the stack is resumed.
      *
      * @param prev The previously resumed activity, for when in the process
@@ -2564,6 +2584,7 @@ class ActivityStack extends ConfigurationContainer {
     @GuardedBy("mService")
     boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) {
         if (mInResumeTopActivity) {
+            // recuse 递归
             // Don't even start recursing.
             return false;
         }
@@ -2610,6 +2631,13 @@ class ActivityStack extends ConfigurationContainer {
         mStackSupervisor.updateTopResumedActivityIfNeeded();
     }
 
+    /**
+     * 被调用调用 @see  resumeTopActivityUncheckedLocked(ActivityRecord,ActivityOptions)
+     * 但是内部要留意startSpecificActivityLocked()函数被调用。有两处呢。
+     * @param prev
+     * @param options
+     * @return
+     */
     @GuardedBy("mService")
     private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options) {
         if (!mService.isBooting() && !mService.isBooted()) {
@@ -2647,9 +2675,11 @@ class ActivityStack extends ConfigurationContainer {
         // If the top activity is the resumed one, nothing to do.
         if (mResumedActivity == next && next.isState(RESUMED)
                 && display.allResumedActivitiesComplete()) {
+
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
             executeAppTransition(options);
+
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "resumeTopActivityLocked: Top activity resumed " + next);
             return false;
@@ -2663,7 +2693,9 @@ class ActivityStack extends ConfigurationContainer {
         // activity is paused, well that is the state we want.
         if (shouldSleepOrShutDownActivities()
                 && mLastPausedActivity == next
-                && mRootActivityContainer.allPausedActivitiesComplete()) {
+                && mRootActivityContainer.allPausedActivitiesComplete())
+        {
+
             // If the current top activity may be able to occlude keyguard but the occluded state
             // has not been set, update visibility and check again if we should continue to resume.
             boolean nothingToResume = true;
@@ -2689,6 +2721,7 @@ class ActivityStack extends ConfigurationContainer {
                 return false;
             }
         }
+
 
         // Make sure that the user who owns this activity is started.  If not,
         // we will just leave it as is because someone should be bringing
@@ -2719,8 +2752,11 @@ class ActivityStack extends ConfigurationContainer {
 
         boolean lastResumedCanPip = false;
         ActivityRecord lastResumed = null;
+
         final ActivityStack lastFocusedStack = display.getLastFocusedStack();
-        if (lastFocusedStack != null && lastFocusedStack != this) {
+
+        if (lastFocusedStack != null && lastFocusedStack != this)
+        {
             // So, why aren't we using prev here??? See the param comment on the method. prev doesn't
             // represent the last resumed activity. However, the last focus stack does if it isn't null.
             lastResumed = lastFocusedStack.mResumedActivity;
@@ -2742,11 +2778,13 @@ class ActivityStack extends ConfigurationContainer {
                 && !lastResumedCanPip;
 
         boolean pausing = getDisplay().pauseBackStacks(userLeaving, next, false);
+
         if (mResumedActivity != null) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "resumeTopActivityLocked: Pausing " + mResumedActivity);
             pausing |= startPausingLocked(userLeaving, false, next, false);
         }
+
         if (pausing && !resumeWhilePausing) {
             if (DEBUG_SWITCH || DEBUG_STATES) Slog.v(TAG_STATES,
                     "resumeTopActivityLocked: Skip resume: need to start pausing");
@@ -2816,6 +2854,7 @@ class ActivityStack extends ConfigurationContainer {
             AppGlobals.getPackageManager().setPackageStoppedState(
                     next.packageName, false, next.mUserId); /* TODO: Verify if correct userid */
         } catch (RemoteException e1) {
+
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, "Failed trying to unstop package "
                     + next.packageName + ": " + e);
@@ -2826,6 +2865,7 @@ class ActivityStack extends ConfigurationContainer {
         // to ignore it when computing the desired screen orientation.
         boolean anim = true;
         final DisplayContent dc = getDisplay().mDisplayContent;
+
         if (prev != null) {
             if (prev.finishing) {
                 if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
@@ -2896,6 +2936,7 @@ class ActivityStack extends ConfigurationContainer {
 
             ActivityRecord lastResumedActivity =
                     lastFocusedStack == null ? null : lastFocusedStack.mResumedActivity;
+
             final ActivityState lastState = next.getState();
 
             mService.updateCpuStats();
@@ -3006,6 +3047,7 @@ class ActivityStack extends ConfigurationContainer {
                     next.showStartingWindow(null /* prev */, false /* newTask */,
                             false /* taskSwitch */);
                 }
+                // 注意这是activity的启动
                 mStackSupervisor.startSpecificActivityLocked(next, true, false);
                 return true;
             }
@@ -3034,6 +3076,7 @@ class ActivityStack extends ConfigurationContainer {
                 if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Restarting: " + next);
             }
             if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Restarting " + next);
+            // 注意这是activity的启动
             mStackSupervisor.startSpecificActivityLocked(next, true, true);
         }
 
@@ -4026,6 +4069,7 @@ class ActivityStack extends ConfigurationContainer {
                     if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Finish needs to pause: " + r);
                     if (DEBUG_USER_LEAVING) Slog.v(TAG_USER_LEAVING,
                             "finish() => pause with userLeaving=false");
+                    // 注意啊.....................
                     startPausingLocked(false, false, null, pauseImmediately);
                 }
 

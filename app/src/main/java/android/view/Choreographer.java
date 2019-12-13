@@ -400,6 +400,7 @@ public final class Choreographer {
     }
 
     /**
+     *
      * Posts a callback to run on the next frame.
      * <p>
      * The callback runs once then is automatically removed.
@@ -460,6 +461,7 @@ public final class Choreographer {
             if (dueTime <= now) {
                 scheduleFrameLocked(now);
             } else {
+                // 将事件发送出去了
                 Message msg = mHandler.obtainMessage(MSG_DO_SCHEDULE_CALLBACK, action);
                 msg.arg1 = callbackType;
                 msg.setAsynchronous(true);

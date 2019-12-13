@@ -33,9 +33,9 @@ import android.text.TextUtils;
 
 /**
  * This class is a base class for Canvas's drawing operations. Any modifications here
- * should be accompanied by a similar modification to {@link BaseRecordingCanvas}.
+ * should be accompanied（v. 陪伴，伴随；伴奏） by a similar modification to {@link BaseRecordingCanvas}.
  *
- * The purpose of this class is to minimize the cost of deciding between regular JNI
+ * The purpose （目的） of this class is to minimize the cost of deciding between regular JNI
  * and @FastNative JNI to just the virtual call that Canvas already has.
  *
  * @hide
@@ -101,6 +101,7 @@ public abstract class BaseCanvas {
     public void drawArc(@NonNull RectF oval, float startAngle, float sweepAngle, boolean useCenter,
             @NonNull Paint paint) {
         throwIfHasHwBitmapInSwMode(paint);
+
         drawArc(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle, useCenter,
                 paint);
     }
@@ -659,6 +660,7 @@ public abstract class BaseCanvas {
             throwIfHasHwBitmapInSwMode(((ComposeShader) shader).mShaderB);
         }
     }
+//------------------------以下是 nativate 函数------------------------------------------------
 
     private static native void nDrawBitmap(long nativeCanvas, long bitmapHandle, float left,
             float top, long nativePaintOrZero, int canvasDensity, int screenDensity,

@@ -142,6 +142,7 @@ public final class Bitmap_Delegate {
         }
         Bitmap_Delegate delegate = new Bitmap_Delegate(image, Config.ARGB_8888);
         delegate.mIsMutable = createFlags.contains(BitmapCreateFlags.MUTABLE);
+        StackOverflowError
 
         return createBitmap(delegate, createFlags, density.getDpiValue());
     }

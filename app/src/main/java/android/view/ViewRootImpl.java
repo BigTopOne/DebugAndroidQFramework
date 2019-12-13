@@ -385,6 +385,7 @@ public final class ViewRootImpl implements ViewParent,
     InputQueue mInputQueue;
     @UnsupportedAppUsage
     FallbackEventHandler mFallbackEventHandler;
+    // . 编舞者，舞蹈指导
     Choreographer mChoreographer;
 
     final Rect mTempRect; // used in the transaction to not thrash the heap.
@@ -566,6 +567,9 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mNeedsRendererSetup;
 
     private final InputEventCompatProcessor mInputCompatProcessor;
+
+    // move position in here.
+    private final TraversalRunnable mTraversalRunnable = new TraversalRunnable();
 
     /**
      * Consistency verifier for debugging purposes.
@@ -1685,13 +1689,18 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * 执行遍历
+     */
     @UnsupportedAppUsage
     void scheduleTraversals() {
         if (!mTraversalScheduled) {
             mTraversalScheduled = true;
             mTraversalBarrier = mHandler.getLooper().getQueue().postSyncBarrier();
+
             mChoreographer.postCallback(
                     Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);
+
             if (!mUnbufferedInputDispatch) {
                 scheduleConsumeBatchedInput();
             }
@@ -1700,15 +1709,23 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * 不执行遍历
+     */
     void unscheduleTraversals() {
         if (mTraversalScheduled) {
             mTraversalScheduled = false;
             mHandler.getLooper().getQueue().removeSyncBarrier(mTraversalBarrier);
+
             mChoreographer.removeCallbacks(
                     Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);
         }
     }
 
+
+    /**
+     * 开始比那里
+     */
     void doTraversal() {
         if (mTraversalScheduled) {
             mTraversalScheduled = false;
@@ -7592,13 +7609,17 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * Traversal :遍历；横越；横断物
+     * 遍历 view，并执行绘制；
+     */
     final class TraversalRunnable implements Runnable {
         @Override
         public void run() {
             doTraversal();
         }
     }
-    final TraversalRunnable mTraversalRunnable = new TraversalRunnable();
+
 
     final class WindowInputEventReceiver extends InputEventReceiver {
         public WindowInputEventReceiver(InputChannel inputChannel, Looper looper) {

@@ -462,7 +462,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     Bundle mCoreSettings = null;
 
     /**
-     * Activity client record, used for bookkeeping for the real {@link Activity} instance.
+     * Activity client record, used for bookkeeping(统计) for the real {@link Activity} instance.
+     * 统计 activity 实例的数量
      */
     public static final class ActivityClientRecord {
         @UnsupportedAppUsage
@@ -640,6 +641,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             return activity != null && activity.mVisibleFromServer;
         }
 
+        @Override
         public String toString() {
             ComponentName componentName = intent != null ? intent.getComponent() : null;
             return "ActivityRecord{"

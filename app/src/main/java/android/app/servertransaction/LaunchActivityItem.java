@@ -72,7 +72,10 @@ public class LaunchActivityItem extends ClientTransactionItem {
         client.countLaunchingActivities(1);
         client.updateProcessState(mProcState, false);
         client.updatePendingConfiguration(mCurConfig);
+
     }
+
+
 
     /**
      *

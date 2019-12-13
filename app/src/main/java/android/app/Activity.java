@@ -159,9 +159,12 @@ import java.util.function.Consumer;
  * An activity is a single, focused thing that the user can do.  Almost all
  * activities interact with the user, so the Activity class takes care of
  * creating a window for you in which you can place your UI with
- * {@link #setContentView}.  While activities are often presented to the user
+ * {@link #setContentView}.
+ * 浮动窗体
+ * While activities are often presented to the user
  * as full-screen windows, they can also be used in other ways: as floating
  * windows (via a theme with {@link android.R.attr#windowIsFloating} set),
+ * 多窗体的实现
  * <a href="https://developer.android.com/guide/topics/ui/multi-window">
  * Multi-Window mode</a> or embedded into other windows.
  * <p>
@@ -308,6 +311,7 @@ import java.util.function.Consumer;
  * </p>
  * <pre class="prettyprint">
  * public class Activity extends ApplicationContext {
+ *       7 个。
  *     protected void onCreate(Bundle savedInstanceState);
  *
  *     protected void onStart();
@@ -395,6 +399,7 @@ import java.util.function.Consumer;
  * because a new activity is being started on top, an existing one is being brought in
  * front of this one, or this one is being destroyed. This is typically used to stop
  * animations and refreshing the UI, etc.
+ *
  * <p>Followed by either <code>onRestart()</code> if
  * this activity is coming back to interact with the user, or
  * <code>onDestroy()</code> if this activity is going away.</td>
@@ -408,7 +413,7 @@ import java.util.function.Consumer;
  * activity is destroyed.  This can happen either because the
  * activity is finishing (someone called {@link Activity#finish} on
  * it), or because the system is temporarily destroying this
- * instance of the activity to save space.  You can distinguish
+ * instance of the activity to save space.  You can distinguish（区分）
  * between these two scenarios with the {@link
  * Activity#isFinishing} method.</td>
  * <td align="center"><font color="#800000"><strong>Yes</strong></font></td>
@@ -483,7 +488,7 @@ import java.util.function.Consumer;
  * that state, this is a convenient way to have an activity restart itself
  * with a new configuration.</p>
  *
- * <p>In some special cases, you may want to bypass restarting of your
+ * <p>In some special cases, you may want to bypass(.迂回;绕开) restarting of your
  * activity based on one or more types of configuration changes.  This is
  * done with the {@link android.R.attr#configChanges android:configChanges}
  * attribute in its manifest.  For any types of configuration changes you say
@@ -559,8 +564,8 @@ import java.util.function.Consumer;
  * <a name="SavingPersistentState"></a>
  * <h3>Saving Persistent State</h3>
  *
- * <p>There are generally two kinds of persistent state that an activity
- * will deal with: shared document-like data (typically stored in a SQLite
+ * <p>There are generally two kinds of persistent( 固执的，坚持的；持久稳固的) state that an activity
+ * will deal with: shared document-like data (typically(代表性地；作为特色地) stored in a SQLite
  * database using a {@linkplain android.content.ContentProvider content provider})
  * and internal state such as user preferences.</p>
  *
@@ -585,7 +590,7 @@ import java.util.function.Consumer;
  * switches between input fields, etc.</p>
  * </ul>
  *
- * <p>This model is designed to prevent data loss when a user is navigating
+ * <p>This model is designed to prevent(阻止; 预防，防止) data loss when a user is navigating
  * between activities, and allows the system to safely kill an activity (because
  * system resources are needed somewhere else) at any time after it has been
  * stopped (or paused on platform versions before {@link android.os.Build.VERSION_CODES#HONEYCOMB}).
@@ -603,7 +608,7 @@ import java.util.function.Consumer;
  * the user's preferred initial display in a calendar (day view or week view)
  * or the user's default home page in a web browser.</p>
  *
- * <p>Activity persistent state is managed
+ * <p>Activity persistent(固执的，坚持的；持久稳固的) state is managed
  * with the method {@link #getPreferences},
  * allowing you to retrieve and
  * modify a set of name/value pairs associated with the activity.  To use
@@ -615,8 +620,8 @@ import java.util.function.Consumer;
  * (Note that it is not possible to share settings data across application
  * packages -- for that you will need a content provider.)</p>
  *
- * <p>Here is an excerpt from a calendar activity that stores the user's
- * preferred view mode in its persistent settings:</p>
+ * <p>Here is an excerpt(摘录，引用) from a calendar activity that stores the user's
+ * preferred view mode in its persistent settings:</p>((
  *
  * <pre class="prettyprint">
  * public class CalendarActivity extends Activity {
@@ -637,7 +642,7 @@ import java.util.function.Consumer;
  *
  *     protected void onPause() {
  *         super.onPause();
- *
+ *         // 这是一个事物，可以链式调用；
  *         SharedPreferences.Editor ed = mPrefs.edit();
  *         ed.putInt("view_mode", mCurViewMode);
  *         ed.commit();
@@ -658,12 +663,13 @@ import java.util.function.Consumer;
  * <p>When starting an Activity you can set {@link Intent#FLAG_GRANT_READ_URI_PERMISSION
  * Intent.FLAG_GRANT_READ_URI_PERMISSION} and/or {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION
  * Intent.FLAG_GRANT_WRITE_URI_PERMISSION} on the Intent.  This will grant the
- * Activity access to the specific URIs in the Intent.  Access will remain
+ * Activity access to the specific URIs in the Intent.
+ * Access will remain
  * until the Activity has finished (it will remain across the hosting
  * process being killed and other temporary destruction).  As of
  * {@link android.os.Build.VERSION_CODES#GINGERBREAD}, if the Activity
  * was already created and a new Intent is being delivered to
- * {@link #onNewIntent(Intent)}, any newly granted URI permissions will be added
+ * {@link #onNewIntent(Intent)}, any newly granted（grant ：允许） URI permissions will be added
  * to the existing ones it holds.
  *
  * <p>See the <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
@@ -675,7 +681,7 @@ import java.util.function.Consumer;
  * <p>The Android system attempts to keep an application process around for as
  * long as possible, but eventually will need to remove old processes when
  * memory runs low. As described in <a href="#ActivityLifecycle">Activity
- * Lifecycle</a>, the decision about which process to remove is intimately
+ * Lifecycle</a>, the decision（决定，决心；决议） about which process to remove is intimately
  * tied to the state of the user's interaction with it. In general, there
  * are four states a process can be in based on the activities running in it,
  * listed here in order of importance. The system will kill less important
@@ -684,7 +690,7 @@ import java.util.function.Consumer;
  *
  * <ol>
  * <li> <p>The <b>foreground activity</b> (the activity at the top of the screen
- * that the user is currently interacting with) is considered the most important.
+ * that the user is currently interacting（相互作用; 相互制约） with) is considered the most important.
  * Its process will only be killed as a last resort, if it uses more memory
  * than is available on the device.  Generally at this point the device has
  * reached a memory paging state, so this is required in order to keep the user
@@ -1719,6 +1725,7 @@ public class Activity extends ContextThemeWrapper
 
         mCalled = true;
 
+
         notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_START);
     }
 
@@ -1726,6 +1733,7 @@ public class Activity extends ContextThemeWrapper
      * This is the same as {@link #onPostCreate(Bundle)} but is called for activities
      * created with the attribute {@link android.R.attr#persistableMode} set to
      * <code>persistAcrossReboots</code>.
+     * hello ，
      *
      * @param savedInstanceState The data most recently supplied in {@link #onSaveInstanceState}
      * @param persistentState    The data caming from the PersistableBundle first
@@ -7664,18 +7672,52 @@ public class Activity extends ContextThemeWrapper
         mParent = parent;
     }
 
+    /**
+     * 依附
+     * @param context
+     * @param aThread
+     * @param instr
+     * @param token
+     * @param ident
+     * @param application
+     * @param intent
+     * @param info
+     * @param title
+     * @param parent
+     * @param id
+     * @param lastNonConfigurationInstances
+     * @param config
+     * @param referrer
+     * @param voiceInteractor
+     * @param window
+     * @param activityConfigCallback
+     * @param assistToken
+     */
     @UnsupportedAppUsage
-    final void attach(Context context, ActivityThread aThread,
-                      Instrumentation instr, IBinder token, int ident,
-                      Application application, Intent intent, ActivityInfo info,
-                      CharSequence title, Activity parent, String id,
+    final void attach(Context context,
+                      ActivityThread aThread,
+                      Instrumentation instr,
+                      IBinder token,
+                      int ident,
+                      Application application,
+                      Intent intent,
+                      ActivityInfo info,
+                      CharSequence title,
+                      Activity parent,
+                      String id,
                       NonConfigurationInstances lastNonConfigurationInstances,
-                      Configuration config, String referrer, IVoiceInteractor voiceInteractor,
-                      Window window, ActivityConfigCallback activityConfigCallback, IBinder assistToken) {
+                      Configuration config,
+                      String referrer,
+                      IVoiceInteractor voiceInteractor,
+                      Window window,
+                      ActivityConfigCallback activityConfigCallback,
+                      IBinder assistToken)
+    {
         attachBaseContext(context);
 
         mFragments.attachHost(null /*parent*/);
 
+        // 处理 winddow
         mWindow = new PhoneWindow(this, window, activityConfigCallback);
         mWindow.setWindowControllerCallback(this);
         mWindow.setCallback(this);
@@ -7687,8 +7729,12 @@ public class Activity extends ContextThemeWrapper
         if (info.uiOptions != 0) {
             mWindow.setUiOptions(info.uiOptions);
         }
+
+
+        // 主线程
         mUiThread = Thread.currentThread();
 
+        // ActivityThread ： mMainThread
         mMainThread = aThread;
         mInstrumentation = instr;
         mToken = token;
@@ -7715,10 +7761,14 @@ public class Activity extends ContextThemeWrapper
         mWindow.setWindowManager(
                 (WindowManager) context.getSystemService(Context.WINDOW_SERVICE),
                 mToken, mComponent.flattenToString(),
+
                 (info.flags & ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0);
+
+
         if (mParent != null) {
             mWindow.setContainer(mParent.getWindow());
         }
+
         mWindowManager = mWindow.getWindowManager();
         mCurrentConfig = config;
 
@@ -8338,9 +8388,10 @@ public class Activity extends ContextThemeWrapper
      */
     @Override
     @NonNull
-    public final View[] autofillClientFindViewsByAutofillIdTraversal(
-            @NonNull AutofillId[] autofillId) {
+    public final View[] autofillClientFindViewsByAutofillIdTraversal(@NonNull AutofillId[] autofillId) {
         final View[] views = new View[autofillId.length];
+
+        // IBinder ：getActivityToken()
         final ArrayList<ViewRootImpl> roots =
                 WindowManagerGlobal.getInstance().getRootViews(getActivityToken());
 
@@ -8388,8 +8439,7 @@ public class Activity extends ContextThemeWrapper
      */
     @Override
     public final @NonNull
-    boolean[] autofillClientGetViewVisibility(
-            @NonNull AutofillId[] autofillIds) {
+    boolean[] autofillClientGetViewVisibility(@NonNull AutofillId[] autofillIds) {
         final int autofillIdCount = autofillIds.length;
         final boolean[] visible = new boolean[autofillIdCount];
         for (int i = 0; i < autofillIdCount; i++) {
@@ -8403,9 +8453,11 @@ public class Activity extends ContextThemeWrapper
                 }
             }
         }
+
         if (android.view.autofill.Helper.sVerbose) {
             Log.v(TAG, "autofillClientGetViewVisibility(): " + Arrays.toString(visible));
         }
+
         return visible;
     }
 
@@ -8680,6 +8732,7 @@ public class Activity extends ContextThemeWrapper
         public <T extends View> T onFindViewById(int id) {
             return Activity.this.findViewById(id);
         }
+
 
         @Override
         public boolean onHasView() {

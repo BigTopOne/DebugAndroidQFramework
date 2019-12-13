@@ -553,7 +553,7 @@ class Thread implements Runnable {
     }
 
     /**
-     * Throws CloneNotSupportedException as a Thread can not be meaningfully
+     * Throws CloneNotSupportedException as a Thread can not be meaningfully （有意义的）
      * cloned. Construct a new Thread instead.
      *
      * @throws  CloneNotSupportedException
@@ -1321,12 +1321,18 @@ class Thread implements Runnable {
      * thread's {@linkplain java.lang.ThreadGroup thread group} and its
      * subgroups. Recursively iterates over all subgroups in the current
      * thread's thread group.
+     * 返回一个活动线程的数量估计在当前线程和它的子组。递归地遍历所有子组在当前线程的线程组。;
      *
      * <p> The value returned is only an estimate because the number of
      * threads may change dynamically while this method traverses internal
      * data structures, and might be affected by the presence of certain
      * system threads. This method is intended primarily for debugging
      * and monitoring purposes.
+     * 他返回值只是一个估计,因为线程的数量可能会改变动态时这个方法遍历内部数据结构,并可能会影响某些系统线程的存在。这种方法的目的是主要用于调试和监控。
+     *          estimate:估计;
+     * 			美式：[ˈestɪmət];英式：[ˈestɪmət];
+     * 			n. 估计，估价；判断，看法
+     * 			v. 估计，估量；判断，评价
      *
      * @return  an estimate of the number of active threads in the current
      *          thread's thread group and in any other thread group that

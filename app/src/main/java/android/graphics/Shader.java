@@ -25,7 +25,7 @@ import android.annotation.UnsupportedAppUsage;
 import libcore.util.NativeAllocationRegistry;
 
 /**
- * Shader is the based class for objects that return horizontal spans of colors
+ * Shader（着色器） is the based class for objects that return horizontal spans of colors
  * during drawing. A subclass of Shader is installed in a Paint calling
  * paint.setShader(shader). After that any object (other than a bitmap) that is
  * drawn with that paint will get its color(s) from the shader.
@@ -34,8 +34,8 @@ public class Shader {
 
     private static class NoImagePreloadHolder {
         public static final NativeAllocationRegistry sRegistry =
-                NativeAllocationRegistry.createMalloced(
-                Shader.class.getClassLoader(), nativeGetFinalizer());
+
+                NativeAllocationRegistry.createMalloced(Shader.class.getClassLoader(), nativeGetFinalizer());
     }
 
     /**
@@ -199,11 +199,12 @@ public class Shader {
     }
 
     /**
-     * Detect the ColorSpace that the {@code colors} share.
+     * Detect（vt. 察觉；发现；探测） the ColorSpace that the {@code colors} share.
      *
      * @throws IllegalArgumentException if the colors do not all share the same,
-     *      valid ColorSpace, or if there are less than 2 colors.
+     *                                  valid ,ColorSpace or if there are less than 2 colors.
      *
+     * colorspace 彩色空间
      * @hide
      */
     public static ColorSpace detectColorSpace(@NonNull @ColorLong long[] colors) {
@@ -219,6 +220,10 @@ public class Shader {
         return colorSpace;
     }
 
+    /**
+     *  Finalizer ：终结器
+     * @return
+     */
     private static native long nativeGetFinalizer();
 
 }

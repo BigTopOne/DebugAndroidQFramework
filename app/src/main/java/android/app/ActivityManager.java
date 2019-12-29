@@ -64,6 +64,7 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
@@ -858,10 +859,19 @@ public class ActivityManager {
     static public int staticGetMemoryClass() {
         // Really brain dead right now -- just take this from the configured
         // vm heap size, and assume it is in megabytes and thus ends with "m".
-        String vmHeapSize = SystemProperties.get("dalvik.vm.heapgrowthlimit", "");
+        String vmHeapSize = SystemProperties.get(
+                "dalvik.vm.heapgrowthlimit", "");
+
+        // 这样写也是 ok 的。
+        if (!TextUtils.isEmpty(vmHeapSize)) {
+            return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length()-1));
+
+        }
+
         if (vmHeapSize != null && !"".equals(vmHeapSize)) {
             return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length()-1));
         }
+
         return staticGetLargeMemoryClass();
     }
 
@@ -4046,14 +4056,19 @@ public class ActivityManager {
         return ActivityTaskManager.getService();
     }
 
+    /**
+     * 利用泛型实现的单例
+     */
     @UnsupportedAppUsage
     private static final Singleton<IActivityManager> IActivityManagerSingleton =
             new Singleton<IActivityManager>() {
                 @Override
                 protected IActivityManager create() {
+
+                    // 开始跨进程通信了。
+                    //  Returns a reference to a service with the given name.
                     final IBinder b = ServiceManager.getService(Context.ACTIVITY_SERVICE);
-                    final IActivityManager am = IActivityManager.Stub.asInterface(b);
-                    return am;
+                    return IActivityManager.Stub.asInterface(b);
                 }
             };
 

@@ -16,8 +16,12 @@
 
 package android.widget;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.util.AttributeSet;
+
+import cn.test.debug.R;
 
 /**
  * <p>
@@ -55,6 +59,7 @@ import android.util.AttributeSet;
 public class CheckBox extends CompoundButton {
     public CheckBox(Context context) {
         this(context, null);
+        
     }
 
     public CheckBox(Context context, AttributeSet attrs) {

@@ -63,6 +63,7 @@ import android.sysprop.VoldProperties;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.EventLogTags;
 import android.util.Slog;
 import android.util.TimingsTraceLog;
 import android.view.WindowManager;
@@ -344,8 +345,13 @@ public final class SystemServer {
 
     /**
      * The main entry point from zygote.
+     * 孕育天地的主要入口，这是 java 的 main 函数入口吧？
+     * 和 ActivityThread#main() 函数区别什么？
+     * 是调用级别不同？
      */
     public static void main(String[] args) {
+        // 靠。。。。乍一看，还以为 run() 函数是静态的。
+        // 直接 new，直接调......
         new SystemServer().run();
     }
 
@@ -470,17 +476,22 @@ public final class SystemServer {
             // Increase the number of binder threads in system_server
             BinderInternal.setMaxThreads(sMaxBinderThreads);
 
+            // 准备SystemServer运行环境:设置线程优先级，创建主线层Looper，ActivityThread和SystemContext
             // Prepare the main looper thread (this thread).
-            android.os.Process.setThreadPriority(
-                    android.os.Process.THREAD_PRIORITY_FOREGROUND);
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_FOREGROUND);
+
             android.os.Process.setCanSelfBackground(false);
+
+            // 准备主线程的 Looper。
             Looper.prepareMainLooper();
             Looper.getMainLooper().setSlowLogThresholdMs(
                     SLOW_DISPATCH_THRESHOLD_MS, SLOW_DELIVERY_THRESHOLD_MS);
 
+            // 初始化 native 服务。
             // Initialize native services.
             System.loadLibrary("android_servers");
 
+            // 构建 debug 版本时，允许堆内存的数据收集。
             // Debug builds - allow heap profiling.
             if (Build.IS_DEBUGGABLE) {
                 initZygoteChildHeapProfiling();
@@ -490,20 +501,25 @@ public final class SystemServer {
             // This call may not return.
             performPendingShutdown();
 
+            // 这个很重要，创建 system上进程的 ActivityThread 和 SystetmContext
             // Initialize the system context.
             createSystemContext();
 
+            // 增加 SystemServiceManger :同一 system services 的创建，启动和生命周期，
+            // 多用户切换
             // Create the system service manager.
             mSystemServiceManager = new SystemServiceManager(mSystemContext);
             mSystemServiceManager.setStartInfo(mRuntimeRestart,
                     mRuntimeStartElapsedTime, mRuntimeStartUptime);
+            // 添加到本地服务：用的是：ArrayMap
             LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);
             // Prepare the thread pool for init tasks that can be parallelized
             SystemServerInitThreadPool.get();
         } finally {
-            traceEnd();  // InitBeforeStartServices
+            // InitBeforeStartServices
+            traceEnd();
         }
-
+//---------------------------华丽的分割线--->各种服务要开始了--------------------------------------------------
         // Start services.
         try {
             traceBeginAndSlog("StartServices");
@@ -518,6 +534,7 @@ public final class SystemServer {
         } finally {
             traceEnd();
         }
+//---------------------------华丽的分割线-----------------------------------------------------
 
         StrictMode.initVmDefaults(null);
 
@@ -531,12 +548,14 @@ public final class SystemServer {
             }
         }
 
+//---------------------------华丽的分割线-----------------------------------------------------
         // Diagnostic to ensure that the system is in a base healthy state. Done here as a common
         // non-zygote process.
         if (!VMRuntime.hasBootImageSpaces()) {
             Slog.wtf(TAG, "Runtime is not running with a boot image!");
         }
 
+        // app 不死，loop 不停；
         // Loop forever.
         Looper.loop();
         throw new RuntimeException("Main thread loop unexpectedly exited");
@@ -615,6 +634,7 @@ public final class SystemServer {
     }
 
     /**
+     * 这个函数的代码，在视觉上：很漂亮；
      * Starts the small tangle of critical services that are needed to get the system off the
      * ground.  These services have complex mutual dependencies which is why we initialize them all
      * in one place here.  Unless your service is also entwined in these dependencies, it should be
@@ -624,6 +644,8 @@ public final class SystemServer {
         // Start the watchdog as early as possible so we can crash the system server
         // if we deadlock during early boot
         traceBeginAndSlog("StartWatchdog");
+        //  This class calls its monitor every minute.
+        //  Killing this process if they don't return
         final Watchdog watchdog = Watchdog.getInstance();
         watchdog.start();
         traceEnd();
@@ -657,8 +679,10 @@ public final class SystemServer {
         // TODO: Might need to move after migration to WM.
         ActivityTaskManagerService atm = mSystemServiceManager.startService(
                 ActivityTaskManagerService.Lifecycle.class).getService();
+        // 创建了 ASM。
         mActivityManagerService = ActivityManagerService.Lifecycle.startService(
                 mSystemServiceManager, atm);
+
         mActivityManagerService.setSystemServiceManager(mSystemServiceManager);
         mActivityManagerService.setInstaller(installer);
         mWindowManagerGlobalLock = atm.getGlobalLock();
@@ -776,6 +800,7 @@ public final class SystemServer {
 
         // Set up the Application instance for the system process and get started.
         traceBeginAndSlog("SetSystemProcess");
+        // 3：将 SystemServer进程设置到 AMS 中，便于调度管理
         mActivityManagerService.setSystemProcess();
         traceEnd();
 
@@ -818,7 +843,10 @@ public final class SystemServer {
     }
 
     /**
-     * Starts some essential services that are not tangled up in the bootstrap process.
+     * NOTE:这个函数很臭，很长。
+     * 开始一些基本的服务，这些服务不是纠缠在 bootstrap 进程中的。
+     * Starts some essential services
+     * that are not tangled up in the bootstrap process.
      */
     private void startCoreServices() {
         traceBeginAndSlog("StartBatteryService");
@@ -828,6 +856,7 @@ public final class SystemServer {
 
         // Tracks application usage stats.
         traceBeginAndSlog("StartUsageService");
+
         mSystemServiceManager.startService(UsageStatsService.class);
         mActivityManagerService.setUsageStatsManager(
                 LocalServices.getService(UsageStatsManagerInternal.class));
@@ -870,6 +899,10 @@ public final class SystemServer {
         mSystemServiceManager.startService(GpuService.class);
         traceEnd();
     }
+
+
+
+
 
     /**
      * Starts a miscellaneous grab bag of stuff that has yet to be refactored and organized.
@@ -979,6 +1012,7 @@ public final class SystemServer {
             traceEnd();
 
             traceBeginAndSlog("InstallSystemProviders");
+            // 3：将相关 provider 运行在 systemserver 进程中：SettingProvider
             mActivityManagerService.installSystemProviders();
             // Now that SettingsProvider is ready, reactivate SQLiteCompatibilityWalFlags
             SQLiteCompatibilityWalFlags.reset();
@@ -1029,6 +1063,7 @@ public final class SystemServer {
             traceEnd();
 
             traceBeginAndSlog("SetWindowManagerService");
+            // 4: 直接保存 wms 对象，与 WMS 交互。
             mActivityManagerService.setWindowManager(wm);
             traceEnd();
 
@@ -2027,19 +2062,24 @@ public final class SystemServer {
         final IpSecService ipSecServiceF = ipSecService;
         final WindowManagerService windowManagerF = wm;
 
+        // AMS作为Framework核心，做好准备就绪后就开始启动应用层，和对AMS有依赖的服务
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
         // where third party code can really run (but before it has actually
         // started launching the initial applications), for us to complete our
         // initialization.
+        // 不要怕，看看这个函数，
+        // systemReady(final Runnable goingCallback, TimingsTraceLog traceLog)
+        // new 了一个线程而已；
         mActivityManagerService.systemReady(() -> {
             Slog.i(TAG, "Making services ready");
             traceBeginAndSlog("StartActivityManagerReadyPhase");
-            mSystemServiceManager.startBootPhase(
-                    SystemService.PHASE_ACTIVITY_MANAGER_READY);
+            mSystemServiceManager.startBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
             traceEnd();
             traceBeginAndSlog("StartObservingNativeCrashes");
+
             try {
+                // 观察ing native crash.
                 mActivityManagerService.startObservingNativeCrashes();
             } catch (Throwable e) {
                 reportWtf("observing native crashes", e);
@@ -2049,6 +2089,7 @@ public final class SystemServer {
             // No dependency on Webview preparation in system server. But this should
             // be completed before allowing 3rd party
             final String WEBVIEW_PREPARATION = "WebViewFactoryPreparation";
+            // 哈哈哈。。。。开始用Future了。
             Future<?> webviewPrep = null;
             if (!mOnlyCore && mWebViewUpdateService != null) {
                 webviewPrep = SystemServerInitThreadPool.get().submit(() -> {
@@ -2071,6 +2112,7 @@ public final class SystemServer {
 
             traceBeginAndSlog("StartSystemUI");
             try {
+                // 启动了 SystemUi。
                 startSystemUi(context, windowManagerF);
             } catch (Throwable e) {
                 reportWtf("starting System UI", e);
@@ -2084,6 +2126,7 @@ public final class SystemServer {
             if (safeMode) {
                 traceBeginAndSlog("EnableAirplaneModeInSafeMode");
                 try {
+                    // 设置飞行模式；
                     connectivityF.setAirplaneMode(true);
                 } catch (Throwable e) {
                     reportWtf("enabling Airplane Mode during Safe Mode bootup", e);
@@ -2098,6 +2141,12 @@ public final class SystemServer {
             } catch (Throwable e) {
                 reportWtf("making Network Managment Service ready", e);
             }
+
+
+            // 🌷🌷🌷🌷🌷🌷🌷
+            // java 并发工具类：CountDownLatch和CyclicBarrier.
+            // CountDownLatch 主要用来解决一个线程等待多个线程的场景；
+            // CyclicBarrier   是一组线程之间互相等待;
             CountDownLatch networkPolicyInitReadySignal = null;
             if (networkPolicyF != null) {
                 networkPolicyInitReadySignal = networkPolicyF

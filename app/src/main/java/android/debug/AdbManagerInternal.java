@@ -27,7 +27,7 @@ import java.io.File;
 public abstract class AdbManagerInternal {
     /**
      * Registers a ADB transport mechanism.
-     *
+     * adb 传输机制。
      * @param transport ADB transport interface to register
      */
     public abstract void registerTransport(IAdbTransport transport);

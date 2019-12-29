@@ -78,6 +78,7 @@ public class SystemServiceManager {
     /**
      * Creates and starts a system service. The class must be a subclass of
      * {@link com.android.server.SystemService}.
+     * 创建并执行系统服务；
      *
      * @param serviceClass A Java class that implements the SystemService interface.
      * @return The service instance, never null.

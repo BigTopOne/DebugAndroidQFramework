@@ -2501,7 +2501,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * (use {@link #getPointerId(int)} to find the pointer identifier for this index).
      *
      * @param axis The axis identifier for the axis value to retrieve.
-     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+     * @param pointerIndex Raw index of pointer to retrieve（检索）.  Value may be from 0
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
      * @return The value of the axis, or 0 if the axis is not available.
      *
@@ -2513,7 +2513,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Populates a {@link PointerCoords} object with pointer coordinate data for
+     * Populates（填充） a {@link PointerCoords} object with pointer coordinate data for
      * the specified pointer index.
      *
      * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
@@ -3139,6 +3139,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
+     * 调用 nativa 函数
      * Sets this event's action.
      */
     public final void setAction(int action) {
@@ -3679,7 +3680,11 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         return ev;
     }
 
-    /** @hide */
+    /**
+     * @hide
+     *
+     * 事件取消
+     */
     @Override
     public final void cancel() {
         setAction(ACTION_CANCEL);

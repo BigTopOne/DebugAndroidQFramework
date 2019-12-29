@@ -7103,6 +7103,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * performClick()-----> li.mOnClickListener.onClick(this);
      * Entry point for {@link #performClick()} - other methods on View should call it instead of
      * {@code performClick()} directly to make sure the autofill manager is notified when
      * necessary (as subclasses could extend {@code performClick()} without calling the parent's
@@ -7118,6 +7119,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * 执行 click 事件
      * Call this view's OnClickListener, if it is defined.  Performs all normal
      * actions associated with clicking: reporting accessibility event, playing
      * a sound, etc.
@@ -7137,6 +7139,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final ListenerInfo li = mListenerInfo;
         if (li != null && li.mOnClickListener != null) {
             playSoundEffect(SoundEffectConstants.CLICK);
+
             li.mOnClickListener.onClick(this);
             result = true;
         } else {
@@ -7151,6 +7154,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * 调用 onclick
      * Directly call any attached OnClickListener.  Unlike {@link #performClick()},
      * this only calls the listener, and does not do any associated clicking
      * actions like reporting an accessibility event.
@@ -14770,6 +14774,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // events, it just doesn't respond to them.
             return clickable;
         }
+
         if (mTouchDelegate != null) {
             if (mTouchDelegate.onTouchEvent(event)) {
                 return true;
@@ -14783,6 +14788,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     if ((viewFlags & TOOLTIP) == TOOLTIP) {
                         handleTooltipUp();
                     }
+
                     if (!clickable) {
                         removeTapCallback();
                         removeLongPressCallback();
@@ -14791,7 +14797,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         mIgnoreNextUpEvent = false;
                         break;
                     }
+
                     boolean prepressed = (mPrivateFlags & PFLAG_PREPRESSED) != 0;
+
                     if ((mPrivateFlags & PFLAG_PRESSED) != 0 || prepressed) {
                         // take focus if we don't have it already and we should in
                         // touch mode.
@@ -14821,6 +14829,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                                     mPerformClick = new PerformClick();
                                 }
                                 if (!post(mPerformClick)) {
+                                    // TODO: 2019-12-16 onClick事件的分发   By Mr Zhou
+                                  // onTouchEvent()------>performClick()-----> li.mOnClickListener.onClick(this);
                                     performClickInternal();
                                 }
                             }

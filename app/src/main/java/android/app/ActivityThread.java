@@ -7339,6 +7339,10 @@ public final class ActivityThread extends ClientTransactionHandler {
         ViewRootImpl.addConfigCallback(configChangedCallback);
     }
 
+    /**
+     * 这个静态，要注意调用的地方啊。
+     * @return
+     */
     @UnsupportedAppUsage
     public static ActivityThread systemMain() {
         // The system process on low-memory devices do not get to use hardware

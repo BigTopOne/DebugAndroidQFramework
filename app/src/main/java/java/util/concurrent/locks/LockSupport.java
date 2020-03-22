@@ -38,6 +38,7 @@ package java.util.concurrent.locks;
 /**
  * Basic thread blocking primitives for creating locks and other
  * synchronization classes.
+ * 基本线程阻塞同步原语创建锁和其他类。
  *
  * <p>This class associates, with each thread that uses it, a permit
  * (in the sense of the {@link java.util.concurrent.Semaphore
@@ -98,8 +99,8 @@ package java.util.concurrent.locks;
  * <pre> {@code
  * class FIFOMutex {
  *   private final AtomicBoolean locked = new AtomicBoolean(false);
- *   private final Queue<Thread> waiters
- *     = new ConcurrentLinkedQueue<>();
+ *   private final Queue<Thread> waiters  = new ConcurrentLinkedQueue<>();
+ *
  *
  *   public void lock() {
  *     boolean wasInterrupted = false;
@@ -133,7 +134,10 @@ package java.util.concurrent.locks;
  * }}</pre>
  */
 public class LockSupport {
-    private LockSupport() {} // Cannot be instantiated.
+    /**
+     * Cannot be instantiated.
+     */
+    private LockSupport() {} //
 
     private static void setBlocker(Thread t, Object arg) {
         // Even though volatile, hotspot doesn't need a write barrier here.
@@ -405,6 +409,26 @@ public class LockSupport {
         return r;
     }
 
+    /**
+     * 遗憾的是，Unsafe对象不能直接通过new Unsafe()或调用Unsafe.getUnsafe()获取，原因如下：
+     *
+     * *不能直接new Unsafe()，原因是Unsafe被设计成单例模式，构造方法是私有的；
+     *
+     * *不能通过调用Unsafe.getUnsafe()获取，因为getUnsafe被设计成只能从引导类加载器（bootstrap class loader）加载，
+     * 从getUnsafe的源码中也可以看出来，如下：
+     *      @CallerSensitive
+     *     public static Unsafe getUnsafe() {
+     *         //得到调用该方法的Class对象
+     *         Class cc = Reflection.getCallerClass();
+     *         //判断调用该方法的类是否是引导类加载器（bootstrap class loader）
+     *         //如果不是的话，比如由AppClassLoader调用该方法，则抛出SecurityException异常
+     *         if (cc.getClassLoader() != null)
+     *             throw new SecurityException("Unsafe");
+     *         //返回单例对象
+     *         return theUnsafe;
+     *     }
+     */
+    // 热点通过intrinsic API实现;
     // Hotspot implementation via intrinsics API
     private static final sun.misc.Unsafe U = sun.misc.Unsafe.getUnsafe();
     private static final long PARKBLOCKER;

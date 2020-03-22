@@ -63,6 +63,7 @@ public class AbsoluteLayout extends ViewGroup {
         int maxHeight = 0;
         int maxWidth = 0;
 
+        // 调用父类的函数，开始测量
         // Find out how big everyone wants to be
         measureChildren(widthMeasureSpec, heightMeasureSpec);
 

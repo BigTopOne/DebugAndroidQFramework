@@ -1208,6 +1208,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         if (o == null) {
             return null;
         }
+
         try {
             return (IBinder) o;
         } catch (ClassCastException e) {

@@ -28,9 +28,11 @@ import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
+import static android.os.CoolingDevice.TYPE_COMPONENT;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -110,6 +112,7 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.BlockedNumberContract;
 import android.provider.CalendarContract;
@@ -295,6 +298,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     final ApplicationThread mAppThread = new ApplicationThread();
     @UnsupportedAppUsage
     final Looper mLooper = Looper.myLooper();
+
     @UnsupportedAppUsage
     final H mH = new H();
     final Executor mExecutor = new HandlerExecutor(mH);
@@ -1796,6 +1800,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+
+
     class H extends Handler {
         public static final int BIND_APPLICATION = 110;
         @UnsupportedAppUsage
@@ -1849,6 +1855,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         public static final int ATTACH_AGENT = 155;
         public static final int APPLICATION_INFO_CHANGED = 156;
         public static final int RUN_ISOLATED_ENTRY_POINT = 158;
+        // 执行交易，哈哈哈哈哈。。。
         public static final int EXECUTE_TRANSACTION = 159;
         public static final int RELAUNCH_ACTIVITY = 160;
         public static final int PURGE_RESOURCES = 161;
@@ -2101,8 +2108,10 @@ public final class ActivityThread extends ClientTransactionHandler {
                             (String[]) ((SomeArgs) msg.obj).arg2);
                     break;
                 case EXECUTE_TRANSACTION:
+                    // handle 带过来的。
                     final ClientTransaction transaction = (ClientTransaction) msg.obj;
-                    // 重点
+                    // 重点，transaction里面含有 token，也是就 IBinder 的一个对象；
+                    IBinder activityToken = transaction.getActivityToken();
                     mTransactionExecutor.execute(transaction);
                     if (isSystem()) {
                         // Client transactions inside system process are recycled on the client side
@@ -2484,6 +2493,11 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    /**
+     * 获取UI上下文的实现，SystemServer 调用的哦，
+     *
+     * @return
+     */
     public ContextImpl getSystemUiContext() {
         synchronized (this) {
             if (mSystemUiContext == null) {
@@ -7245,6 +7259,12 @@ public final class ActivityThread extends ClientTransactionHandler {
         System.exit(0);
     }
 
+    /**
+     * 依附
+     *
+     * @param system
+     * @param startSeq
+     */
     @UnsupportedAppUsage
     private void attach(boolean system, long startSeq) {
         sCurrentActivityThread = this;
@@ -7341,6 +7361,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     /**
      * 这个静态，要注意调用的地方啊。
+     *
      * @return
      */
     @UnsupportedAppUsage
@@ -7545,7 +7566,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
         ActivityThread thread = new ActivityThread();
-        // invoke attach
+        // invoke attach，开始依附了。
         thread.attach(false, startSeq);
 
         if (sMainThreadHandler == null) {
@@ -7572,7 +7593,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
-    // ------------------ Regular JNI ------------------------
+    // ------------------ Regular(adj.合格的;定期的) JNI ------------------------
     private native void nPurgePendingResources();
 
     private native void nDumpGraphicsInfo(FileDescriptor fd);

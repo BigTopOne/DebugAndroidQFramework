@@ -734,6 +734,7 @@ public class Activity extends ContextThemeWrapper
         OnCreateContextMenuListener, ComponentCallbacks2,
         Window.OnWindowDismissedCallback, WindowControllerCallback,
         AutofillManager.AutofillClient, ContentCaptureManager.ContentCaptureClient {
+
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 

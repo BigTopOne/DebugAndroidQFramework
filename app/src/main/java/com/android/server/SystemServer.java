@@ -624,7 +624,11 @@ public final class SystemServer {
         }
     }
 
+    /**
+     * 创建系统上下文。
+     */
     private void createSystemContext() {
+        //
         ActivityThread activityThread = ActivityThread.systemMain();
         mSystemContext = activityThread.getSystemContext();
         mSystemContext.setTheme(DEFAULT_SYSTEM_THEME);

@@ -24,7 +24,8 @@ import java.io.FileDescriptor;
 
 /**
  * Base interface for a remotable object, the core part of a lightweight
- * remote procedure call mechanism designed for high performance when
+ * remote procedure( 程序，手续；步骤,美式：[prəˈsiːdʒər];英式：[prəˈsiːdʒə(r)];)
+ * call mechanism designed for high performance when
  * performing in-process and cross-process calls.  This
  * interface describes the abstract protocol for interacting with a
  * remotable object.  Do not implement this interface directly, instead

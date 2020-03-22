@@ -45,6 +45,7 @@ public class BaseBundle {
     private static final int BUNDLE_MAGIC = 0x4C444E42; // 'B' 'N' 'D' 'L'
     private static final int BUNDLE_MAGIC_NATIVE = 0x4C444E44; // 'B' 'N' 'D' 'N'
 
+
     /**
      * Flag indicating that this Bundle is okay to "defuse." That is, it's okay
      * for system processes to ignore any {@link BadParcelableException}
@@ -75,7 +76,10 @@ public class BaseBundle {
     // A parcel cannot be obtained during compile-time initialization. Put the
     // empty parcel into an inner class that can be initialized separately. This
     // allows to initialize BaseBundle, and classes depending on it.
-    /** {@hide} */
+
+    /**
+     * {@hide}
+     */
     static final class NoImagePreloadHolder {
         public static final Parcel EMPTY_PARCEL = Parcel.obtain();
     }
@@ -104,7 +108,9 @@ public class BaseBundle {
      */
     private ClassLoader mClassLoader;
 
-    /** {@hide} */
+    /**
+     * {@hide}
+     */
     @VisibleForTesting
     public int mFlags;
 
@@ -112,8 +118,8 @@ public class BaseBundle {
      * Constructs a new, empty Bundle that uses a specific ClassLoader for
      * instantiating Parcelable and Serializable objects.
      *
-     * @param loader An explicit ClassLoader to use when instantiating objects
-     * inside of the Bundle.
+     * @param loader   An explicit ClassLoader to use when instantiating objects
+     *                 inside of the Bundle.
      * @param capacity Initial size of the ArrayMap.
      */
     BaseBundle(@Nullable ClassLoader loader, int capacity) {
@@ -148,7 +154,7 @@ public class BaseBundle {
      * instantiating Parcelable and Serializable objects.
      *
      * @param loader An explicit ClassLoader to use when instantiating objects
-     * inside of the Bundle.
+     *               inside of the Bundle.
      */
     BaseBundle(ClassLoader loader) {
         this(loader, 0);
@@ -184,7 +190,7 @@ public class BaseBundle {
      * TODO: optimize this later (getting just the value part of a Bundle
      * with a single pair) once Bundle.forPair() above is implemented
      * with a special single-value Map implementation/serialization.
-     *
+     * <p>
      * Note: value in single-pair Bundle may be null.
      *
      * @hide
@@ -211,7 +217,7 @@ public class BaseBundle {
      * Changes the ClassLoader this Bundle uses when instantiating objects.
      *
      * @param loader An explicit ClassLoader to use when instantiating objects
-     * inside of the Bundle.
+     *               inside of the Bundle.
      */
     void setClassLoader(ClassLoader loader) {
         mClassLoader = loader;
@@ -245,7 +251,7 @@ public class BaseBundle {
     }
 
     private void initializeFromParcelLocked(@NonNull Parcel parcelledData, boolean recycleParcel,
-            boolean parcelledByNative) {
+                                            boolean parcelledByNative) {
         if (LOG_DEFUSABLE && sShouldDefuse && (mFlags & FLAG_DEFUSABLE) == 0) {
             Slog.wtf(TAG, "Attempting to unparcel a Bundle while in transit; this may "
                     + "clobber all data inside!", new Throwable());
@@ -340,7 +346,9 @@ public class BaseBundle {
         }
     }
 
-    /** @hide */
+    /**
+     * @hide
+     */
     ArrayMap<String, Object> getMap() {
         unparcel();
         return mMap;
@@ -386,10 +394,8 @@ public class BaseBundle {
      * @param a A {@link BaseBundle} object
      * @param b Another {@link BaseBundle} to compare with a
      * @return {@code true} if both are the same, {@code false} otherwise
-     *
-     * @see #kindofEquals(BaseBundle)
-     *
      * @hide
+     * @see #kindofEquals(BaseBundle)
      */
     public static boolean kindofEquals(BaseBundle a, BaseBundle b) {
         return (a == b) || (a != null && a.kindofEquals(b));
@@ -422,6 +428,7 @@ public class BaseBundle {
 
     void copyInternal(BaseBundle from, boolean deep) {
         synchronized (from) {
+
             if (from.mParcelledData != null) {
                 if (from.isEmptyParcel()) {
                     mParcelledData = NoImagePreloadHolder.EMPTY_PARCEL;
@@ -457,42 +464,56 @@ public class BaseBundle {
         }
     }
 
+
+    /**
+     * java 的深拷贝。
+     * @param value
+     * @return
+     */
     Object deepCopyValue(Object value) {
         if (value == null) {
             return null;
         }
         if (value instanceof Bundle) {
-            return ((Bundle)value).deepCopy();
+            return ((Bundle) value).deepCopy();
+
         } else if (value instanceof PersistableBundle) {
-            return ((PersistableBundle)value).deepCopy();
+
+            return ((PersistableBundle) value).deepCopy();
+
         } else if (value instanceof ArrayList) {
+
             return deepcopyArrayList((ArrayList) value);
+
         } else if (value.getClass().isArray()) {
             if (value instanceof int[]) {
-                return ((int[])value).clone();
+                return ((int[]) value).clone();
             } else if (value instanceof long[]) {
-                return ((long[])value).clone();
+                return ((long[]) value).clone();
             } else if (value instanceof float[]) {
-                return ((float[])value).clone();
+                return ((float[]) value).clone();
             } else if (value instanceof double[]) {
-                return ((double[])value).clone();
+                return ((double[]) value).clone();
             } else if (value instanceof Object[]) {
-                return ((Object[])value).clone();
+                return ((Object[]) value).clone();
             } else if (value instanceof byte[]) {
-                return ((byte[])value).clone();
+                return ((byte[]) value).clone();
             } else if (value instanceof short[]) {
-                return ((short[])value).clone();
+                return ((short[]) value).clone();
             } else if (value instanceof char[]) {
                 return ((char[]) value).clone();
             }
+
+
         }
         return value;
     }
 
+
     ArrayList deepcopyArrayList(ArrayList from) {
         final int N = from.size();
         ArrayList out = new ArrayList(N);
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < N; i++) {
             out.add(deepCopyValue(from.get(i)));
         }
         return out;
@@ -567,7 +588,7 @@ public class BaseBundle {
      * Inserts a Boolean value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a boolean
      */
     public void putBoolean(@Nullable String key, boolean value) {
@@ -579,7 +600,7 @@ public class BaseBundle {
      * Inserts a byte value into the mapping of this Bundle, replacing
      * any existing value for the given key.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a byte
      */
     void putByte(@Nullable String key, byte value) {
@@ -591,7 +612,7 @@ public class BaseBundle {
      * Inserts a char value into the mapping of this Bundle, replacing
      * any existing value for the given key.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a char
      */
     void putChar(@Nullable String key, char value) {
@@ -603,7 +624,7 @@ public class BaseBundle {
      * Inserts a short value into the mapping of this Bundle, replacing
      * any existing value for the given key.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a short
      */
     void putShort(@Nullable String key, short value) {
@@ -615,7 +636,7 @@ public class BaseBundle {
      * Inserts an int value into the mapping of this Bundle, replacing
      * any existing value for the given key.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value an int
      */
     public void putInt(@Nullable String key, int value) {
@@ -627,7 +648,7 @@ public class BaseBundle {
      * Inserts a long value into the mapping of this Bundle, replacing
      * any existing value for the given key.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a long
      */
     public void putLong(@Nullable String key, long value) {
@@ -639,7 +660,7 @@ public class BaseBundle {
      * Inserts a float value into the mapping of this Bundle, replacing
      * any existing value for the given key.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a float
      */
     void putFloat(@Nullable String key, float value) {
@@ -651,7 +672,7 @@ public class BaseBundle {
      * Inserts a double value into the mapping of this Bundle, replacing
      * any existing value for the given key.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a double
      */
     public void putDouble(@Nullable String key, double value) {
@@ -663,7 +684,7 @@ public class BaseBundle {
      * Inserts a String value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a String, or null
      */
     public void putString(@Nullable String key, @Nullable String value) {
@@ -675,7 +696,7 @@ public class BaseBundle {
      * Inserts a CharSequence value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a CharSequence, or null
      */
     void putCharSequence(@Nullable String key, @Nullable CharSequence value) {
@@ -687,7 +708,7 @@ public class BaseBundle {
      * Inserts an ArrayList<Integer> value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value an ArrayList<Integer> object, or null
      */
     void putIntegerArrayList(@Nullable String key, @Nullable ArrayList<Integer> value) {
@@ -699,7 +720,7 @@ public class BaseBundle {
      * Inserts an ArrayList<String> value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value an ArrayList<String> object, or null
      */
     void putStringArrayList(@Nullable String key, @Nullable ArrayList<String> value) {
@@ -711,7 +732,7 @@ public class BaseBundle {
      * Inserts an ArrayList<CharSequence> value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value an ArrayList<CharSequence> object, or null
      */
     void putCharSequenceArrayList(@Nullable String key, @Nullable ArrayList<CharSequence> value) {
@@ -723,7 +744,7 @@ public class BaseBundle {
      * Inserts a Serializable value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a Serializable object, or null
      */
     void putSerializable(@Nullable String key, @Nullable Serializable value) {
@@ -735,7 +756,7 @@ public class BaseBundle {
      * Inserts a boolean array value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a boolean array object, or null
      */
     public void putBooleanArray(@Nullable String key, @Nullable boolean[] value) {
@@ -747,7 +768,7 @@ public class BaseBundle {
      * Inserts a byte array value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a byte array object, or null
      */
     void putByteArray(@Nullable String key, @Nullable byte[] value) {
@@ -759,7 +780,7 @@ public class BaseBundle {
      * Inserts a short array value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a short array object, or null
      */
     void putShortArray(@Nullable String key, @Nullable short[] value) {
@@ -771,7 +792,7 @@ public class BaseBundle {
      * Inserts a char array value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a char array object, or null
      */
     void putCharArray(@Nullable String key, @Nullable char[] value) {
@@ -783,7 +804,7 @@ public class BaseBundle {
      * Inserts an int array value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value an int array object, or null
      */
     public void putIntArray(@Nullable String key, @Nullable int[] value) {
@@ -795,7 +816,7 @@ public class BaseBundle {
      * Inserts a long array value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a long array object, or null
      */
     public void putLongArray(@Nullable String key, @Nullable long[] value) {
@@ -807,7 +828,7 @@ public class BaseBundle {
      * Inserts a float array value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a float array object, or null
      */
     void putFloatArray(@Nullable String key, @Nullable float[] value) {
@@ -819,7 +840,7 @@ public class BaseBundle {
      * Inserts a double array value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a double array object, or null
      */
     public void putDoubleArray(@Nullable String key, @Nullable double[] value) {
@@ -831,7 +852,7 @@ public class BaseBundle {
      * Inserts a String array value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a String array object, or null
      */
     public void putStringArray(@Nullable String key, @Nullable String[] value) {
@@ -843,7 +864,7 @@ public class BaseBundle {
      * Inserts a CharSequence array value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
-     * @param key a String, or null
+     * @param key   a String, or null
      * @param value a CharSequence array object, or null
      */
     void putCharSequenceArray(@Nullable String key, @Nullable CharSequence[] value) {
@@ -867,7 +888,7 @@ public class BaseBundle {
 
     // Log a message if the value was non-null but not of the expected type
     void typeWarning(String key, Object value, String className,
-            Object defaultValue, ClassCastException e) {
+                     Object defaultValue, ClassCastException e) {
         StringBuilder sb = new StringBuilder();
         sb.append("Key ");
         sb.append(key);
@@ -883,7 +904,7 @@ public class BaseBundle {
     }
 
     void typeWarning(String key, Object value, String className,
-            ClassCastException e) {
+                     ClassCastException e) {
         typeWarning(key, value, className, "<null>", e);
     }
 
@@ -891,7 +912,7 @@ public class BaseBundle {
      * Returns the value associated with the given key, or defaultValue if
      * no mapping of the desired type exists for the given key.
      *
-     * @param key a String
+     * @param key          a String
      * @param defaultValue Value to return if key does not exist
      * @return a boolean value
      */
@@ -925,7 +946,7 @@ public class BaseBundle {
      * Returns the value associated with the given key, or defaultValue if
      * no mapping of the desired type exists for the given key.
      *
-     * @param key a String
+     * @param key          a String
      * @param defaultValue Value to return if key does not exist
      * @return a byte value
      */
@@ -959,7 +980,7 @@ public class BaseBundle {
      * Returns the value associated with the given key, or defaultValue if
      * no mapping of the desired type exists for the given key.
      *
-     * @param key a String
+     * @param key          a String
      * @param defaultValue Value to return if key does not exist
      * @return a char value
      */
@@ -993,7 +1014,7 @@ public class BaseBundle {
      * Returns the value associated with the given key, or defaultValue if
      * no mapping of the desired type exists for the given key.
      *
-     * @param key a String
+     * @param key          a String
      * @param defaultValue Value to return if key does not exist
      * @return a short value
      */
@@ -1027,11 +1048,11 @@ public class BaseBundle {
      * Returns the value associated with the given key, or defaultValue if
      * no mapping of the desired type exists for the given key.
      *
-     * @param key a String
+     * @param key          a String
      * @param defaultValue Value to return if key does not exist
      * @return an int value
      */
-   public int getInt(String key, int defaultValue) {
+    public int getInt(String key, int defaultValue) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1061,7 +1082,7 @@ public class BaseBundle {
      * Returns the value associated with the given key, or defaultValue if
      * no mapping of the desired type exists for the given key.
      *
-     * @param key a String
+     * @param key          a String
      * @param defaultValue Value to return if key does not exist
      * @return a long value
      */
@@ -1095,7 +1116,7 @@ public class BaseBundle {
      * Returns the value associated with the given key, or defaultValue if
      * no mapping of the desired type exists for the given key.
      *
-     * @param key a String
+     * @param key          a String
      * @param defaultValue Value to return if key does not exist
      * @return a float value
      */
@@ -1129,7 +1150,7 @@ public class BaseBundle {
      * Returns the value associated with the given key, or defaultValue if
      * no mapping of the desired type exists for the given key.
      *
-     * @param key a String
+     * @param key          a String
      * @param defaultValue Value to return if key does not exist
      * @return a double value
      */
@@ -1172,11 +1193,11 @@ public class BaseBundle {
      * no mapping of the desired type exists for the given key or if a null
      * value is explicitly associated with the given key.
      *
-     * @param key a String, or null
+     * @param key          a String, or null
      * @param defaultValue Value to return if key does not exist or if a null
-     *     value is associated with the given key.
+     *                     value is associated with the given key.
      * @return the String value associated with the given key, or defaultValue
-     *     if no valid String object is currently mapped to that key.
+     * if no valid String object is currently mapped to that key.
      */
     public String getString(@Nullable String key, String defaultValue) {
         final String s = getString(key);
@@ -1208,11 +1229,11 @@ public class BaseBundle {
      * no mapping of the desired type exists for the given key or if a null
      * value is explicitly associated with the given key.
      *
-     * @param key a String, or null
+     * @param key          a String, or null
      * @param defaultValue Value to return if key does not exist or if a null
-     *     value is associated with the given key.
+     *                     value is associated with the given key.
      * @return the CharSequence value associated with the given key, or defaultValue
-     *     if no valid CharSequence object is currently mapped to that key.
+     * if no valid CharSequence object is currently mapped to that key.
      */
     CharSequence getCharSequence(@Nullable String key, CharSequence defaultValue) {
         final CharSequence cs = getCharSequence(key);
@@ -1544,6 +1565,7 @@ public class BaseBundle {
     /**
      * Writes the Bundle contents to a Parcel, typically in order for
      * it to be passed through an IBinder connection.
+     *
      * @param parcel The parcel to copy this bundle to.
      */
     void writeToParcelInner(Parcel parcel, int flags) {
@@ -1594,6 +1616,7 @@ public class BaseBundle {
     /**
      * Reads the Parcel contents into this Bundle, typically in order for
      * it to be passed through an IBinder connection.
+     *
      * @param parcel The parcel to overwrite this bundle from.
      */
     void readFromParcelInner(Parcel parcel) {
@@ -1640,7 +1663,7 @@ public class BaseBundle {
         p.setDataPosition(0);
         p.appendFrom(parcel, offset, length);
         p.adoptClassCookies(parcel);
-        if (DEBUG) Log.d(TAG, "Retrieving "  + Integer.toHexString(System.identityHashCode(this))
+        if (DEBUG) Log.d(TAG, "Retrieving " + Integer.toHexString(System.identityHashCode(this))
                 + ": " + length + " bundle bytes starting at " + offset);
         p.setDataPosition(0);
 
@@ -1648,7 +1671,9 @@ public class BaseBundle {
         mParcelledByNative = isNativeBundle;
     }
 
-    /** {@hide} */
+    /**
+     * {@hide}
+     */
     public static void dumpStats(IndentingPrintWriter pw, String key, Object value) {
         final Parcel tmp = Parcel.obtain();
         tmp.writeValue(value);
@@ -1666,7 +1691,9 @@ public class BaseBundle {
         }
     }
 
-    /** {@hide} */
+    /**
+     * {@hide}
+     */
     public static void dumpStats(IndentingPrintWriter pw, SparseArray array) {
         pw.increaseIndent();
         if (array == null) {
@@ -1679,7 +1706,9 @@ public class BaseBundle {
         pw.decreaseIndent();
     }
 
-    /** {@hide} */
+    /**
+     * {@hide}
+     */
     public static void dumpStats(IndentingPrintWriter pw, BaseBundle bundle) {
         pw.increaseIndent();
         if (bundle == null) {

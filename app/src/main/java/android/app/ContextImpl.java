@@ -2425,6 +2425,7 @@ class ContextImpl extends Context {
     }
 
     /**
+     * 创建系统 UI 上下文。
      * System Context to be used for UI. This Context has resources that can be themed.
      * Make sure that the created system UI context shares the same LoadedApk as the system context.
      * @param systemContext The system context which created by
@@ -2442,6 +2443,10 @@ class ContextImpl extends Context {
     }
 
     /**
+     *
+     * SystemServer 调用 ActivityThread 的getSystemUiContext（）函数，
+     * ActivityThread的的getSystemUiContext（）
+     * 函数又 TMD的 开始调用 ContextImpl 的createSystemUiContext() 函数
      * The overloaded method of {@link #createSystemUiContext(ContextImpl, int)}.
      * Uses {@Code Display.DEFAULT_DISPLAY} as the target display.
      */

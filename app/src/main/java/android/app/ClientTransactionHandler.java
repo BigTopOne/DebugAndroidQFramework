@@ -33,21 +33,27 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ *客户端事物
  * Defines operations that a {@link android.app.servertransaction.ClientTransaction} or its items
  * can perform on client.
+ *
  * @hide
  */
 public abstract class ClientTransactionHandler {
 
     // Schedule phase related logic and handlers.
 
-    /** Prepare and schedule transaction for execution. */
+    /**
+     * 安排事务
+     * Prepare and schedule transaction for execution.
+     */
     void scheduleTransaction(ClientTransaction transaction) {
         transaction.preExecute(this);
         sendMessage(ActivityThread.H.EXECUTE_TRANSACTION, transaction);
     }
 
     /**
+     * 执行事物
      * Execute transaction immediately without scheduling it. This is used for local requests, so
      * it will also recycle the transaction.
      */
@@ -66,114 +72,157 @@ public abstract class ClientTransactionHandler {
 
     abstract void sendMessage(int what, Object obj);
 
-    /** Get activity instance for the token. */
+    /**
+     * Get activity instance for the token.
+     */
     public abstract Activity getActivity(IBinder token);
 
     // Prepare phase related logic and handlers. Methods that inform about about pending changes or
     // do other internal bookkeeping.
 
-    /** Set pending config in case it will be updated by other transaction item. */
+    /**
+     * Set pending config in case it will be updated by other transaction item.
+     */
     public abstract void updatePendingConfiguration(Configuration config);
 
-    /** Set current process state. */
+    /**
+     * Set current process state.
+     */
     public abstract void updateProcessState(int processState, boolean fromIpc);
 
-    /** Count how many activities are launching. */
+    /**
+     * Count how many activities are launching.
+     */
     public abstract void countLaunchingActivities(int num);
 
     // Execute phase related logic and handlers. Methods here execute actual lifecycle transactions
     // and deliver callbacks.
 
-    /** Get activity and its corresponding transaction item which are going to destroy. */
+    /**
+     * Get activity and its corresponding transaction item which are going to destroy.
+     */
     public abstract Map<IBinder, ClientTransactionItem> getActivitiesToBeDestroyed();
 
-    /** Destroy the activity. */
+    /**
+     * Destroy the activity.
+     */
     public abstract void handleDestroyActivity(IBinder token, boolean finishing, int configChanges,
-            boolean getNonConfigInstance, String reason);
+                                               boolean getNonConfigInstance, String reason);
 
-    /** Pause the activity. */
+    /**
+     * Pause the activity.
+     */
     public abstract void handlePauseActivity(IBinder token, boolean finished, boolean userLeaving,
-            int configChanges, PendingTransactionActions pendingActions, String reason);
+                                             int configChanges, PendingTransactionActions pendingActions, String reason);
 
     /**
      * Resume the activity.
-     * @param token Target activity token.
+     *
+     * @param token             Target activity token.
      * @param finalStateRequest Flag indicating if this call is handling final lifecycle state
      *                          request for a transaction.
-     * @param isForward Flag indicating if next transition is forward.
-     * @param reason Reason for performing this operation.
+     * @param isForward         Flag indicating if next transition is forward.
+     * @param reason            Reason for performing this operation.
      */
     public abstract void handleResumeActivity(IBinder token, boolean finalStateRequest,
-            boolean isForward, String reason);
+                                              boolean isForward, String reason);
 
     /**
      * Notify the activity about top resumed state change.
-     * @param token Target activity token.
+     *
+     * @param token                Target activity token.
      * @param isTopResumedActivity Current state of the activity, {@code true} if it's the
      *                             topmost resumed activity in the system, {@code false} otherwise.
-     * @param reason Reason for performing this operation.
+     * @param reason               Reason for performing this operation.
      */
     public abstract void handleTopResumedActivityChanged(IBinder token,
-            boolean isTopResumedActivity, String reason);
+                                                         boolean isTopResumedActivity, String reason);
 
     /**
      * Stop the activity.
-     * @param token Target activity token.
-     * @param show Flag indicating whether activity is still shown.
-     * @param configChanges Activity configuration changes.
-     * @param pendingActions Pending actions to be used on this or later stages of activity
-     *                       transaction.
+     *
+     * @param token             Target activity token.
+     * @param show              Flag indicating whether activity is still shown.
+     * @param configChanges     Activity configuration changes.
+     * @param pendingActions    Pending actions to be used on this or later stages of activity
+     *                          transaction.
      * @param finalStateRequest Flag indicating if this call is handling final lifecycle state
      *                          request for a transaction.
-     * @param reason Reason for performing this operation.
+     * @param reason            Reason for performing this operation.
      */
     public abstract void handleStopActivity(IBinder token, boolean show, int configChanges,
-            PendingTransactionActions pendingActions, boolean finalStateRequest, String reason);
+                                            PendingTransactionActions pendingActions, boolean finalStateRequest, String reason);
 
-    /** Report that activity was stopped to server. */
+    /**
+     * Report that activity was stopped to server.
+     */
     public abstract void reportStop(PendingTransactionActions pendingActions);
 
-    /** Restart the activity after it was stopped. */
+    /**
+     * Restart the activity after it was stopped.
+     */
     public abstract void performRestartActivity(IBinder token, boolean start);
 
-    /** Set pending activity configuration in case it will be updated by other transaction item. */
+    /**
+     * Set pending activity configuration in case it will be updated by other transaction item.
+     */
     public abstract void updatePendingActivityConfiguration(IBinder activityToken,
-            Configuration overrideConfig);
+                                                            Configuration overrideConfig);
 
-    /** Deliver activity (override) configuration change. */
+    /**
+     * Deliver activity (override) configuration change.
+     */
     public abstract void handleActivityConfigurationChanged(IBinder activityToken,
-            Configuration overrideConfig, int displayId);
+                                                            Configuration overrideConfig, int displayId);
 
-    /** Deliver result from another activity. */
+    /**
+     * Deliver result from another activity.
+     */
     public abstract void handleSendResult(IBinder token, List<ResultInfo> results, String reason);
 
-    /** Deliver multi-window mode change notification. */
+    /**
+     * Deliver multi-window mode change notification.
+     */
     public abstract void handleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode,
-            Configuration overrideConfig);
+                                                      Configuration overrideConfig);
 
-    /** Deliver new intent. */
+    /**
+     * Deliver new intent.
+     */
     public abstract void handleNewIntent(IBinder token, List<ReferrerIntent> intents);
 
-    /** Deliver picture-in-picture mode change notification. */
+    /**
+     * Deliver picture-in-picture mode change notification.
+     */
     public abstract void handlePictureInPictureModeChanged(IBinder token, boolean isInPipMode,
-            Configuration overrideConfig);
+                                                           Configuration overrideConfig);
 
-    /** Update window visibility. */
+    /**
+     * Update window visibility.
+     */
     public abstract void handleWindowVisibility(IBinder token, boolean show);
 
-    /** Perform activity launch. */
+    /**
+     * Perform activity launch.
+     */
     public abstract Activity handleLaunchActivity(ActivityThread.ActivityClientRecord r,
-            PendingTransactionActions pendingActions, Intent customIntent);
+                                                  PendingTransactionActions pendingActions, Intent customIntent);
 
-    /** Perform activity start. */
+    /**
+     * Perform activity start.
+     */
     public abstract void handleStartActivity(ActivityThread.ActivityClientRecord r,
-            PendingTransactionActions pendingActions);
+                                             PendingTransactionActions pendingActions);
 
-    /** Get package info. */
+    /**
+     * Get package info.
+     */
     public abstract LoadedApk getPackageInfoNoCheck(ApplicationInfo ai,
-            CompatibilityInfo compatInfo);
+                                                    CompatibilityInfo compatInfo);
 
-    /** Deliver app configuration change notification. */
+    /**
+     * Deliver app configuration change notification.
+     */
     public abstract void handleConfigurationChanged(Configuration config);
 
     /**
@@ -185,33 +234,36 @@ public abstract class ClientTransactionHandler {
     /**
      * Prepare activity relaunch to update internal bookkeeping. This is used to track multiple
      * relaunch and config update requests.
-     * @param token Activity token.
-     * @param pendingResults Activity results to be delivered.
+     *
+     * @param token             Activity token.
+     * @param pendingResults    Activity results to be delivered.
      * @param pendingNewIntents New intent messages to be delivered.
-     * @param configChanges Mask of configuration changes that have occurred.
-     * @param config New configuration applied to the activity.
-     * @param preserveWindow Whether the activity should try to reuse the window it created,
-     *                        including the decor view after the relaunch.
+     * @param configChanges     Mask of configuration changes that have occurred.
+     * @param config            New configuration applied to the activity.
+     * @param preserveWindow    Whether the activity should try to reuse the window it created,
+     *                          including the decor view after the relaunch.
      * @return An initialized instance of {@link ActivityThread.ActivityClientRecord} to use during
-     *         relaunch, or {@code null} if relaunch cancelled.
+     * relaunch, or {@code null} if relaunch cancelled.
      */
     public abstract ActivityThread.ActivityClientRecord prepareRelaunchActivity(IBinder token,
-            List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
-            int configChanges, MergedConfiguration config, boolean preserveWindow);
+                                                                                List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
+                                                                                int configChanges, MergedConfiguration config, boolean preserveWindow);
 
     /**
      * Perform activity relaunch.
-     * @param r Activity client record prepared for relaunch.
+     *
+     * @param r              Activity client record prepared for relaunch.
      * @param pendingActions Pending actions to be used on later stages of activity transaction.
-     * */
+     */
     public abstract void handleRelaunchActivity(ActivityThread.ActivityClientRecord r,
-            PendingTransactionActions pendingActions);
+                                                PendingTransactionActions pendingActions);
 
     /**
      * Report that relaunch request was handled.
-     * @param token Target activity token.
+     *
+     * @param token          Target activity token.
      * @param pendingActions Pending actions initialized on earlier stages of activity transaction.
      *                       Used to check if we should report relaunch to WM.
-     * */
+     */
     public abstract void reportRelaunch(IBinder token, PendingTransactionActions pendingActions);
 }
